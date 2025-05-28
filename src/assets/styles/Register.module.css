@@ -1,0 +1,96 @@
+.container {
+  width: 50%;
+  height: auto;
+  display: flex;
+  justify-content: center; /* Căn giữa theo chiều ngang */
+  align-items: center; /* Căn giữa theo chiều dọc */
+  flex-direction: column; /* Đảm bảo nội dung xếp theo cột */
+}
+
+.registerForm {
+  display: flex;
+  width: 100%;
+  height: 100vh; /* Chiều cao full màn hình */
+  justify-content: center; /* Căn giữa toàn bộ form */
+  align-items: center;
+}
+
+.inputGroup {
+  width: 80%; /* Tùy chỉnh chiều rộng */
+  display: flex;
+  flex-direction: column;
+  gap: 10px; /* Tạo khoảng cách giữa các input */
+}
+
+.inputGroup input {
+  width: 100%;
+  padding: 10px;
+}
+
+.inputGroup button {
+  padding: 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.imgcontainer {
+  width: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.imgcontainer img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.authLink {
+  color: #0077cc; /* Text color */
+  text-decoration: none;
+}
+h2 {
+  margin-bottom: 30px;
+  font-size: clamp(30px, 2.448vw, 98px);
+  font-weight: 500;
+  line-height: 125%;
+  letter-spacing: -0.47px;
+}
+.input_block {
+  padding: 16px 20px;
+  border-radius: 28px;
+  border: 1px solid gainsboro;
+  box-shadow: var(--shadow-xs);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  fill: var(--base-white);
+  width: 500px;
+  height: 25px;
+  margin-bottom: 20px;
+}
+.inputGroup input {
+  width: 100%;
+  padding: 10px;
+  border: none; /* Xóa viền */
+  outline: none; /* Xóa viền xanh khi focus */
+  background-color: transparent; /* Đảm bảo không có nền */
+}
+.inputbtn {
+  background-color: #0077cc;
+  width: 273px; /* Đảm bảo chiều rộng giống nhau */
+  height: 58px;
+  border-radius: 28px;
+  border: 1px solid gainsboro;
+  margin-bottom: 10px;
+}
+label {
+  margin-right: 10px;
+}
+.error {
+  color: red;
+}
+.message {
+  color: #007bff;
+}

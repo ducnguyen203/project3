@@ -1,0 +1,329 @@
+/* Ensure vertical scrollbar is always visible */
+html {
+  overflow-y: scroll;
+}
+
+/* Ensure body takes full viewport height */
+body {
+  min-height: 100vh;
+  font-family: OpenSans-Regular;
+}
+
+/* Main container for the page */
+.block_main {
+  max-width: 1250px;
+  width: 100%;
+  margin: 90px auto 0;
+  display: flex;
+  padding: 0 20px;
+  box-sizing: border-box;
+}
+
+/* Booking information section (left side) */
+.booking_information {
+  width: 60%;
+  max-width: 800px;
+  margin-bottom: 20px;
+}
+
+/* Details information section (right side, for ticket info) */
+.details_Information {
+  width: 30%;
+  max-width: 400px;
+  margin-left: 10px;
+  margin-bottom: 30px;
+}
+
+/* Styles for the service selection container */
+.container {
+  border: 1px solid #eee;
+  border-radius: 20px;
+  background-color: #f9f9f9;
+  padding: 15px;
+  margin-bottom: 10px;
+}
+
+/* Grid layout for service selection */
+.gridContainer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Image container for service icon */
+.imageContainer {
+  width: 40px;
+  height: 40px;
+}
+
+.imageContainer img {
+  width: 100%;
+  height: auto;
+}
+
+/* Text container for service title and subtitle */
+.textContainer {
+  flex: 1;
+}
+
+.textWrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.textGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: #555;
+  margin-top: 5px;
+}
+
+/* Arrow container for the chevron icon */
+.arrowContainer {
+  width: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.arrowContainer svg {
+  width: 8px;
+  height: 12px;
+}
+
+/* Flight sidebar filter */
+.FlightSidebar_filter {
+  width: 100%;
+  max-width: 400px;
+  border: 1px solid var(--gray-200, #eaecf0);
+  background: var(--base-white, #fff);
+  border-radius: 20px;
+  margin-left: 10px;
+  margin-bottom: 30px;
+  max-height: 325px;
+  height: auto;
+}
+
+.bookingInfo > div {
+  border-bottom: 1px solid #ccc;
+  padding: 10px 15px;
+}
+
+.bookingInfo > div:last-child {
+  border-bottom: none;
+}
+
+.title h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+}
+
+.routeInfo p,
+.ticketInfo p {
+  margin: 5px 0;
+  font-size: 14px;
+}
+
+.totalAmount p {
+  margin: 5px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.totalAmount strong {
+  font-size: 16px;
+  color: #004d40;
+}
+
+.totalAmount button {
+  width: 90px;
+  height: 35px;
+  border-radius: 20px;
+  border: 1px solid gainsboro;
+  margin-left: 40px;
+  background-color: #007bff;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.totalAmount button:hover {
+  background: #ff9900;
+}
+
+/* Seat selection modal styles */
+.seatModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.seatModalContent {
+  background: white;
+  border-radius: 10px;
+  padding: 20px;
+  width: 90%;
+  max-width: 600px;
+  text-align: center;
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.modalHeader h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.seatMapContainer {
+  margin: 0 auto;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.seatMapHeader {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 10px;
+}
+
+.seatColumnLabel {
+  width: 40px;
+  text-align: center;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.seatMap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.seatRow {
+  display: flex;
+  justify-content: space-around;
+  gap: 5px;
+}
+
+.seatButton {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background: #e0e0e0;
+  cursor: pointer;
+  font-size: 12px;
+  position: relative;
+}
+
+.seatButton:disabled {
+  background: #f0f0f0;
+  cursor: not-allowed;
+}
+
+.selectedSeat {
+  background: #ff0000;
+  color: white;
+  border-color: #ff0000;
+}
+
+.unavailableSeat {
+  background: #e0e0e0;
+  cursor: not-allowed;
+}
+
+.seatIcon {
+  font-size: 16px;
+}
+
+.seatLabel {
+  font-size: 10px;
+  position: absolute;
+  bottom: 2px;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.confirmButton {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  background: #ff0000;
+  color: white;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.confirmButton:hover {
+  background: #cc0000;
+}
+
+.cancelButton {
+  padding: 10px 20px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background: white;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.cancelButton:hover {
+  background: #f0f0f0;
+}
+/* Styles cho loại ghế */
+.firstClassSeat {
+  background: #ffd700; /* Vàng */
+  border-color: #ffd700;
+}
+
+.businessSeat {
+  background: #87ceeb; /* Xanh nhạt */
+  border-color: #87ceeb;
+}
+
+.economySeat {
+  background: #e0e0e0; /* Xám nhạt */
+  border-color: #ccc;
+}

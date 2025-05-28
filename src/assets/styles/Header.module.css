@@ -1,0 +1,78 @@
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #f0f0f0;
+  padding: 1rem 2rem;
+  border-bottom: 1px solid #b6aeae;
+}
+
+.main_menu_left {
+  display: flex;
+  align-items: center;
+  gap: 45px;
+}
+.logo {
+  display: flex;
+  align-items: center;
+}
+
+.logoIcon {
+  font-size: 2rem;
+  color: #00aaff; /* Logo color */
+  margin-right: 0.5rem;
+}
+
+.logoText {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #0077cc; /* Text color */
+}
+
+.navList {
+  list-style: none;
+  display: flex;
+  padding: 0;
+  margin: 0;
+}
+
+.navItem {
+  margin: 0 1.5rem;
+}
+
+.navItem a {
+  text-decoration: none;
+  color: black;
+  font-weight: 500;
+}
+
+.navItem a:hover {
+  color: #0077cc; /* Hover color */
+}
+
+.auth {
+  display: flex;
+  align-items: center;
+}
+
+.authLink {
+  margin-left: 0.5rem;
+  font-weight: bold;
+  color: #0077cc; /* Text color */
+  text-decoration: none;
+}
+
+.logoImg {
+  width: 65%; /* Điều chỉnh kích thước */
+  height: auto;
+}
+.space {
+  margin-left: 6px;
+}
+body {
+  font-family: OpenSans-Regular;
+}
+.profile button {
+  border: none;
+  cursor: pointer;
+}
