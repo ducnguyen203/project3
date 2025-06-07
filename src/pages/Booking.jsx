@@ -24,7 +24,7 @@ const Booking = () => {
   //     <div>
   //       Lỗi: Vui lòng chọn đầy đủ vé cho chuyến đi và chuyến về (nếu có).
   //     </div>
-  //   );
+  //   )
   // }
 
   const [sections, setSections] = useState(() => {

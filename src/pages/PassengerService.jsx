@@ -16,7 +16,7 @@ const PassengerService = () => {
     selectedDepartureTicket,
     selectedReturnTicket,
     totalPrice,
-    passengerData, // Nhận passengerData từ state
+    passengerData,
   } = state || {};
 
   // Kiểm tra dữ liệu đầu vào
@@ -27,23 +27,37 @@ const PassengerService = () => {
   //   !passengerData
   // ) {
   //   return (
-  //     <div>Lỗi: Thiếu thông tin đặt vé. Vui lòng quay lại và thử lại.</div>
+  //     <div className={styles.error}>
+  //       Lỗi: Thiếu thông tin đặt vé. Vui lòng quay lại và thử lại.
+  //     </div>
   //   );
   // }
 
-  // Kiểm tra ngày khởi hành (so với ngày hiện tại: 29/05/2025)
-  const today = new Date("2025-05-29T01:35:00+07:00");
+  // Kiểm tra ngày khởi hành
+  const today = new Date();
   const departureDate = new Date(selectedDepartureTicket.departure_date);
   if (departureDate < today) {
-    return <div>Lỗi: Chuyến bay chiều đi đã qua thời gian khởi hành.</div>;
+    return (
+      <div className={styles.error}>
+        Lỗi: Chuyến bay chiều đi đã qua thời gian khởi hành.
+      </div>
+    );
   }
   if (tripType === "round-trip" && selectedReturnTicket) {
     const returnDate = new Date(selectedReturnTicket.departure_date);
     if (returnDate < today) {
-      return <div>Lỗi: Chuyến bay chiều về đã qua thời gian khởi hành.</div>;
+      return (
+        <div className={styles.error}>
+          Lỗi: Chuyến bay chiều về đã qua thời gian khởi hành.
+        </div>
+      );
     }
     if (returnDate < departureDate) {
-      return <div>Lỗi: Ngày khởi hành chiều về phải sau chiều đi.</div>;
+      return (
+        <div className={styles.error}>
+          Lỗi: Ngày khởi hành chiều về phải sau chiều đi.
+        </div>
+      );
     }
   }
 
@@ -53,39 +67,43 @@ const PassengerService = () => {
   const [seatSelections, setSeatSelections] = useState({});
   const [seatMap, setSeatMap] = useState([]);
   const [passengerTicketTypes, setPassengerTicketTypes] = useState({});
+  const [error, setError] = useState(null);
 
   // Lấy loại vé từ price_id
   useEffect(() => {
     const fetchTicketTypes = async () => {
       const types = {};
-      const passengerIds = Object.keys(passengerData || {}); // Sử dụng passengerData từ state
+      const passengerIds = Object.keys(passengerData);
       for (const passengerId of passengerIds) {
         try {
+          const priceId = passengerData[passengerId].price_id;
           const response = await fetch(
-            `http://localhost:5000/api/flight-prices/ticket-type?price_id=${passengerData[passengerId].price_id}`
+            `http://localhost:5000/api/flight-prices/ticket-type?price_id=${priceId}`
           );
           if (!response.ok) {
-            throw new Error("Không thể lấy loại vé");
+            throw new Error(`Không thể lấy loại vé cho ${passengerId}`);
           }
           const result = await response.json();
-          types[passengerId] = result?.ticket_type || "Economy";
-        } catch (error) {
-          console.error(`Lỗi khi lấy loại vé cho ${passengerId}:`, error);
-          types[passengerId] = "Economy"; // Giá trị mặc định nếu lỗi
+          types[passengerId] = result.ticket_type || "Economy";
+        } catch (err) {
+          console.error(`Lỗi khi lấy loại vé cho ${passengerId}:`, err);
+          types[passengerId] = "Economy";
         }
       }
       setPassengerTicketTypes(types);
     };
     fetchTicketTypes();
   }, [passengerData]);
+
   // Lấy bản đồ ghế
   useEffect(() => {
     const fetchSeatMap = async () => {
       try {
+        setError(null);
         const scheduleId =
           selectedFlight === "departure"
             ? selectedDepartureTicket.schedule_id
-            : selectedReturnTicket?.schedule_id;
+            : selectedReturnTicket.schedule_id;
         const response = await fetch(
           `http://localhost:5000/api/seats?schedule_id=${scheduleId}`
         );
@@ -95,9 +113,9 @@ const PassengerService = () => {
         }
         const { seatMap } = await response.json();
         setSeatMap(seatMap);
-      } catch (error) {
-        console.error("Lỗi khi lấy bản đồ ghế:", error);
-        alert(`Không thể tải bản đồ ghế: ${error.message}`);
+      } catch (err) {
+        console.error("Lỗi khi lấy bản đồ ghế:", err);
+        setError(`Không thể tải bản đồ ghế: ${err.message}`);
       }
     };
 
@@ -118,6 +136,7 @@ const PassengerService = () => {
   const handleCloseModal = () => {
     setIsSeatModalOpen(false);
     setSelectedPassenger(null);
+    setError(null);
   };
 
   const handleSeatSelect = (seat) => {
@@ -137,11 +156,12 @@ const PassengerService = () => {
 
   const handleConfirmSeat = async () => {
     if (!seatSelections[selectedPassenger]?.[selectedFlight]) {
-      alert("Vui lòng chọn một chỗ ngồi trước khi xác nhận.");
+      setError("Vui lòng chọn một chỗ ngồi trước khi xác nhận.");
       return;
     }
 
     try {
+      setError(null);
       const response = await fetch("http://localhost:5000/api/seats/assign", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -150,6 +170,10 @@ const PassengerService = () => {
           passengerId: selectedPassenger,
           flightDirection: selectedFlight,
           seatNumber: seatSelections[selectedPassenger][selectedFlight],
+          scheduleId:
+            selectedFlight === "departure"
+              ? selectedDepartureTicket.schedule_id
+              : selectedReturnTicket.schedule_id,
         }),
       });
 
@@ -161,14 +185,14 @@ const PassengerService = () => {
         `Đã chọn chỗ ngồi: ${seatSelections[selectedPassenger][selectedFlight]} cho ${selectedPassenger}`
       );
       handleCloseModal();
-    } catch (error) {
-      console.error("Lỗi khi gán ghế:", error);
-      alert(`Không thể gán ghế: ${error.message}`);
+    } catch (err) {
+      console.error("Lỗi khi gán ghế:", err);
+      setError(`Không thể gán ghế: ${err.message}`);
     }
   };
 
   const handleProceedToPayment = () => {
-    const totalPassengers = passengers.adults + passengers.children; // Infants không cần ghế
+    const totalPassengers = passengers.adults + passengers.children;
     const requiredSeats =
       tripType === "round-trip" ? totalPassengers * 2 : totalPassengers;
     const assignedSeats = Object.values(seatSelections).reduce(
@@ -208,7 +232,7 @@ const PassengerService = () => {
       <div className={bookingStyles.passenger_section} key={passengerId}>
         <div
           className={bookingStyles.passenger_type}
-          onClick={() => handleOpenModal(passengerId, "departure")} // Mở modal khi nhấp vào tiêu đề
+          onClick={() => handleOpenModal(passengerId, "departure")}
         >
           {type === "adult"
             ? `Người lớn ${index + 1}`
@@ -265,11 +289,9 @@ const PassengerService = () => {
                   <h3>Thông tin đặt chỗ</h3>
                 </div>
                 <div className={styles.routeInfo}>
-                  {selectedDepartureTicket && (
-                    <p>
-                      Chuyến đi: {departure} → {destination}
-                    </p>
-                  )}
+                  <p>
+                    Chuyến đi: {departure} → {destination}
+                  </p>
                   {tripType === "round-trip" && selectedReturnTicket && (
                     <p>
                       Chuyến về: {destination} → {departure}
@@ -284,12 +306,10 @@ const PassengerService = () => {
                       passengers.infants) *
                       (tripType === "round-trip" ? 2 : 1)}
                   </p>
-                  {selectedDepartureTicket && (
-                    <p>
-                      Chiều đi: {selectedDepartureTicket.price.toLocaleString()}{" "}
-                      VND
-                    </p>
-                  )}
+                  <p>
+                    Chiều đi: {selectedDepartureTicket.price.toLocaleString()}{" "}
+                    VND
+                  </p>
                   {tripType === "round-trip" && selectedReturnTicket && (
                     <p>
                       Chiều về: {selectedReturnTicket.price.toLocaleString()}{" "}
@@ -322,14 +342,17 @@ const PassengerService = () => {
                 ×
               </button>
             </div>
+            {error && <div className={styles.error}>{error}</div>}
             <div className={styles.seatMapContainer}>
-              <div className={styles.seatMapHeader}>
-                {seatMap[0]?.map((seat) => (
-                  <div key={seat.seat} className={styles.seatColumnLabel}>
-                    {seat.seat.charAt(seat.seat.length - 1)}
-                  </div>
-                ))}
-              </div>
+              {seatMap.length > 0 && (
+                <div className={styles.seatMapHeader}>
+                  {seatMap[0].map((seat) => (
+                    <div key={seat.seat} className={styles.seatColumnLabel}>
+                      {seat.seat.charAt(seat.seat.length - 1)}
+                    </div>
+                  ))}
+                </div>
+              )}
               <div className={styles.seatMap}>
                 {seatMap.map((row, rowIndex) => (
                   <div key={rowIndex} className={styles.seatRow}>
