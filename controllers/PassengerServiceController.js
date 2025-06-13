@@ -8,42 +8,47 @@ class PassengerServiceController {
         return res.status(400).json({ message: "Yêu cầu ID lịch trình" });
       }
       const seatMap = await PassengerService.getSeatMap(schedule_id);
-      res.json({ seatMap });
+      res.status(200).json({ seatMap });
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      console.error("Lỗi trong getSeatMap:", error);
+      res.status(500).json({ message: error.message || "Lỗi server" });
     }
   }
 
   static async assignSeat(req, res) {
     try {
-      const { bookingId, passengerId, flightDirection, seatNumber } = req.body;
-      if (!bookingId || !passengerId || !flightDirection || !seatNumber) {
+      const {
+        bookingId,
+        passengerId,
+        fullName,
+        flightDirection,
+        seatNumber,
+        scheduleId,
+      } = req.body;
+      if (
+        !bookingId ||
+        !passengerId ||
+        !fullName ||
+        !flightDirection ||
+        !seatNumber ||
+        !scheduleId
+      ) {
         return res.status(400).json({ message: "Thiếu các trường bắt buộc" });
       }
-      // Lấy schedule_id từ booking
-      const scheduleQuery = `
-        SELECT ${
-          flightDirection === "departure"
-            ? "departure_schedule_id"
-            : "return_schedule_id"
-        } AS schedule_id
-        FROM bookings
-        WHERE booking_id = ?
-      `;
-      const [scheduleResult] = await db.pool.query(scheduleQuery, [bookingId]);
-      if (!scheduleResult.length) throw new Error("Không tìm thấy booking");
-      const scheduleId = scheduleResult[0].schedule_id;
-
       const result = await PassengerService.assignSeat(
         bookingId,
         passengerId,
+        fullName,
         flightDirection,
         seatNumber,
         scheduleId
       );
-      res.json(result);
+      res
+        .status(200)
+        .json({ seatNumber: result.seatNumber, message: "Gán ghế thành công" });
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      console.error("Lỗi trong assignSeat:", error);
+      res.status(409).json({ message: error.message || "Không thể gán ghế" });
     }
   }
 }
