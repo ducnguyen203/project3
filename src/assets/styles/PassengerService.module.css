@@ -26,81 +26,6 @@ body {
   margin-bottom: 20px;
 }
 
-/* Details information section (right side, for ticket info) */
-.details_Information {
-  width: 30%;
-  max-width: 400px;
-  margin-left: 10px;
-  margin-bottom: 30px;
-}
-
-/* Styles for the service selection container */
-.container {
-  border: 1px solid #eee;
-  border-radius: 20px;
-  background-color: #f9f9f9;
-  padding: 15px;
-  margin-bottom: 10px;
-}
-
-/* Grid layout for service selection */
-.gridContainer {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-/* Image container for service icon */
-.imageContainer {
-  width: 40px;
-  height: 40px;
-}
-
-.imageContainer img {
-  width: 100%;
-  height: auto;
-}
-
-/* Text container for service title and subtitle */
-.textContainer {
-  flex: 1;
-}
-
-.textWrapper {
-  display: flex;
-  flex-direction: column;
-}
-
-.textGroup {
-  display: flex;
-  flex-direction: column;
-}
-
-.title {
-  font-size: 18px;
-  font-weight: bold;
-  color: #333;
-}
-
-.subtitle {
-  font-size: 14px;
-  color: #555;
-  margin-top: 5px;
-}
-
-/* Arrow container for the chevron icon */
-.arrowContainer {
-  width: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.arrowContainer svg {
-  width: 8px;
-  height: 12px;
-}
-
 /* Flight sidebar filter */
 .FlightSidebar_filter {
   width: 100%;
@@ -183,7 +108,9 @@ body {
   border-radius: 10px;
   padding: 20px;
   width: 90%;
-  max-width: 600px;
+  max-width: 700px;
+  max-height: 80vh;
+  overflow-y: auto;
   text-align: center;
 }
 
@@ -192,6 +119,7 @@ body {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
+  padding: 0 10px;
 }
 
 .modalHeader h2 {
@@ -211,12 +139,14 @@ body {
   margin: 0 auto;
   max-width: 100%;
   overflow-x: auto;
+  padding: 10px;
 }
 
 .seatMapHeader {
   display: flex;
   justify-content: space-around;
   margin-bottom: 10px;
+  padding-left: 90px;
 }
 
 .seatColumnLabel {
@@ -234,15 +164,23 @@ body {
 
 .seatRow {
   display: flex;
+  align-items: center;
   justify-content: space-around;
   gap: 5px;
+  flex-wrap: nowrap;
+}
+
+.rowLabel {
+  width: 30px;
+  text-align: right;
+  margin-right: 10px;
+  font-weight: bold;
 }
 
 .seatButton {
   width: 40px;
   height: 40px;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
   border: 1px solid #ccc;
@@ -250,33 +188,77 @@ body {
   background: #e0e0e0;
   cursor: pointer;
   font-size: 12px;
-  position: relative;
+  transition:
+    background-color 0.2s,
+    transform 0.1s;
+}
+
+.seatButton:hover:not(:disabled) {
+  transform: scale(1.05);
 }
 
 .seatButton:disabled {
-  background: #f0f0f0;
+  background: #f0f0e0;
   cursor: not-allowed;
 }
 
 .selectedSeat {
-  background: #ff0000;
+  background: #28a745;
   color: white;
-  border-color: #ff0000;
+  border-color: #28a745;
 }
 
 .unavailableSeat {
-  background: #e0e0e0;
+  background: #dc3545;
+  color: white;
   cursor: not-allowed;
 }
 
-.seatIcon {
-  font-size: 16px;
+/* Seat type styles */
+.firstClassSeat {
+  background: #ffd700;
+  border-color: #ffd700;
 }
 
-.seatLabel {
-  font-size: 10px;
-  position: absolute;
-  bottom: 2px;
+.businessSeat {
+  background: #87ceeb;
+  border-color: #87ceeb;
+}
+
+.economySeat {
+  background: #e0e0e0;
+  border-color: #ccc;
+}
+
+.seatLegend {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  flex-wrap: wrap;
+  margin: 0 auto;
+  margin-top: 25px;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.legendItem span:last-child {
+  font-size: 14px;
+}
+
+.error {
+  color: #dc3545;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.loading {
+  font-size: 16px;
+  color: #333;
+  margin: 20px 0;
 }
 
 .modalActions {
@@ -284,20 +266,26 @@ body {
   justify-content: center;
   gap: 10px;
   margin-top: 20px;
+  padding: 0 10px;
 }
 
 .confirmButton {
   padding: 10px 20px;
   border: none;
   border-radius: 5px;
-  background: #ff0000;
+  background: #28a745;
   color: white;
   cursor: pointer;
   font-size: 14px;
 }
 
-.confirmButton:hover {
-  background: #cc0000;
+.confirmButton:hover:not(:disabled) {
+  background: #218838;
+}
+
+.confirmButton:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
 }
 
 .cancelButton {
@@ -309,21 +297,22 @@ body {
   font-size: 14px;
 }
 
-.cancelButton:hover {
+.cancelButton:hover:not(:disabled) {
   background: #f0f0f0;
 }
-/* Styles cho loại ghế */
-.firstClassSeat {
-  background: #ffd700; /* Vàng */
-  border-color: #ffd700;
-}
 
-.businessSeat {
-  background: #87ceeb; /* Xanh nhạt */
-  border-color: #87ceeb;
-}
-
-.economySeat {
-  background: #e0e0e0; /* Xám nhạt */
-  border-color: #ccc;
+/* Responsive design */
+@media (max-width: 600px) {
+  .seatButton {
+    width: 30px;
+    height: 30px;
+    font-size: 10px;
+  }
+  .seatRow {
+    gap: 2px;
+  }
+  .seatModalContent {
+    width: 95%;
+    padding: 10px;
+  }
 }
