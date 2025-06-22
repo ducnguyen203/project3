@@ -11,6 +11,7 @@ class PassengerService {
         WHERE s.schedule_id = ?
       `;
       const [scheduleResult] = await db.query(scheduleQuery, [scheduleId]);
+      console.log("Schedule result:", scheduleResult);
       if (!scheduleResult.length) {
         throw new Error("Không tìm thấy lịch trình");
       }
@@ -18,12 +19,13 @@ class PassengerService {
       const airplaneId = scheduleResult[0].airplane_id;
 
       const seatQuery = `
-        SELECT s.seat_id, s.seat_number, s.seat_type
+        SELECT s.seat_id, s.seat_number, s.seat_type, sa.check_status
         FROM seats s
         LEFT JOIN seat_availability sa ON s.seat_id = sa.seat_id AND sa.schedule_id = ?
         WHERE s.airplane_id = ?
         ORDER BY CAST(REGEXP_REPLACE(s.seat_number, '[^0-9]', '') AS UNSIGNED), s.seat_number
       `;
+
       const [seats] = await db.query(seatQuery, [scheduleId, airplaneId]);
 
       if (!seats.length) {
@@ -45,7 +47,7 @@ class PassengerService {
           seatId: seat.seat_id,
           seat: seat.seat_number,
           seatType: seat.seat_type,
-          available: !seat.ticket_id, // Giả định ghế khả dụng nếu ticket_id là NULL
+          available: seat.check_status === 1, // MỚI → Chính xác
         });
       });
       if (currentRow.length) seatMap.push(currentRow);
@@ -63,7 +65,8 @@ class PassengerService {
     fullName,
     flightDirection,
     seatNumber,
-    scheduleId
+    scheduleId,
+    passengerTicketType
   ) {
     const connection = await db.getConnection();
     try {
@@ -90,8 +93,14 @@ class PassengerService {
         flightDirection,
       ]);
       if (!ticketResult.length) {
+        console.error("Không tìm thấy vé với:", {
+          bookingId,
+          fullName,
+          flightDirection,
+        });
         throw new Error("Không tìm thấy vé");
       }
+
       const ticketId = ticketResult[0].ticket_id;
 
       // Tìm seat_id
@@ -110,6 +119,7 @@ class PassengerService {
       const insertAvailabilityQuery = `
         INSERT IGNORE INTO seat_availability (schedule_id, seat_id, check_status)
         VALUES (?, ?, 1)
+        ON DUPLICATE KEY UPDATE check_status = check_status
       `;
       await connection.query(insertAvailabilityQuery, [scheduleId, seatId]);
 
@@ -129,6 +139,16 @@ class PassengerService {
         availabilityResult[0].check_status === null
       ) {
         throw new Error("Ghế đã được đặt");
+      }
+
+      const seatTypeQuery = `SELECT seat_type FROM seats WHERE seat_id = ?`;
+      const [seatTypeResult] = await connection.query(seatTypeQuery, [seatId]);
+      const seatType = seatTypeResult[0]?.seat_type;
+
+      if (seatType !== passengerTicketType) {
+        throw new Error(
+          `Ghế ${seatNumber} không phù hợp với loại vé ${passengerTicketType}`
+        );
       }
 
       // Cập nhật ticket với seat_id

@@ -61,11 +61,15 @@ class BookingController {
             message: "Hành khách người lớn cần email, số điện thoại và CCCD",
           });
         }
-        if (!hanhKhach.price_id) {
+        if (
+          !hanhKhach.price_id_departure ||
+          (tripType === "round-trip" && !hanhKhach.price_id_return)
+        ) {
           return res
             .status(400)
             .json({ message: "Price ID là bắt buộc cho mỗi hành khách" });
         }
+
         if (
           !hanhKhach.full_name ||
           !hanhKhach.date_of_birth ||
@@ -86,14 +90,20 @@ class BookingController {
           extendedPassengers.push({
             ...p,
             flight_direction: "departure",
-            price_id: p.price_id,
+            price_id: p.price_id_departure,
           });
           extendedPassengers.push({
             ...p,
             flight_direction: "return",
-            price_id: selectedReturnTicket?.price_id || p.price_id,
+            price_id: p.price_id_return,
           });
         });
+      } else {
+        extendedPassengers = passengers.map((p) => ({
+          ...p,
+          flight_direction: "departure",
+          price_id: p.price_id_departure, // ✅ Cần dòng này để set `price_id`
+        }));
       }
 
       // Tạo đặt vé

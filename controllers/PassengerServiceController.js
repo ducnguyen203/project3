@@ -8,6 +8,7 @@ class PassengerServiceController {
         return res.status(400).json({ message: "Yêu cầu ID lịch trình" });
       }
       const seatMap = await PassengerService.getSeatMap(schedule_id);
+      res.set("Cache-Control", "no-store");
       res.status(200).json({ seatMap });
     } catch (error) {
       console.error("Lỗi trong getSeatMap:", error);
@@ -24,6 +25,7 @@ class PassengerServiceController {
         flightDirection,
         seatNumber,
         scheduleId,
+        passengerTicketType,
       } = req.body;
       if (
         !bookingId ||
@@ -41,7 +43,8 @@ class PassengerServiceController {
         fullName,
         flightDirection,
         seatNumber,
-        scheduleId
+        scheduleId,
+        passengerTicketType
       );
       res
         .status(200)
