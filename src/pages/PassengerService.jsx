@@ -6,7 +6,7 @@ const PassengerService = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
 
-  // Kiểm tra dữ liệu đầu vào
+
   if (!state || !state.selectedDepartureTicket || !state.passengerData) {
     return (
       <div className={styles.error}>
@@ -29,7 +29,7 @@ const PassengerService = () => {
     passengerData,
   } = state;
 
-  // Kiểm tra ngày bay
+
   const today = new Date();
   const departureDate = new Date(selectedDepartureTicket?.departure_date);
   if (departureDate < today) {
@@ -63,7 +63,7 @@ const PassengerService = () => {
   const [passengerTicketTypes, setPassengerTicketTypes] = useState({});
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
-  // Khởi tạo showSeatMap với các passengerId
+
   const [showSeatMap, setShowSeatMap] = useState(() => {
     const initialState = {};
     Object.keys(passengerData).forEach((id) => {
@@ -76,7 +76,6 @@ const PassengerService = () => {
     return initialState;
   });
 
-  // Lấy loại vé cho hành khách
   useEffect(() => {
     const types = {};
     const passengerIds = Object.keys(passengerData || {});
@@ -91,7 +90,7 @@ const PassengerService = () => {
     console.log("Passenger Ticket Types:", JSON.stringify(types, null, 2));
   }, [passengerData]);
 
-  // Tải bản đồ ghế cho chuyến đi và về
+
   useEffect(() => {
     const fetchSeatMap = async (scheduleId, flightDirection) => {
       try {
@@ -139,7 +138,6 @@ const PassengerService = () => {
     }
   }, [selectedDepartureTicket, selectedReturnTicket, tripType]);
 
-  // Tự động chuyển sang chuyến về khi hoàn thành chọn ghế chuyến đi
   useEffect(() => {
     if (currentFlight === "departure" && tripType === "round-trip") {
       const totalPassengers = passengers.adults + passengers.children;
@@ -168,29 +166,6 @@ const PassengerService = () => {
     });
   };
 
-  // const handleSeatSelect = (passengerId, seat, flightDirection) => {
-  //   const ticketType = passengerTicketTypes[passengerId][flightDirection];
-  //   if (seat.seatType !== ticketType) {
-  //     setError(`Ghế ${seat.seat} không phù hợp với loại vé ${ticketType}`);
-  //     return;
-  //   }
-  //   if (seat.available) {
-  //     setSeatSelections((prev) => ({
-  //       ...prev,
-  //       [passengerId]: {
-  //         ...prev[passengerId],
-  //         [flightDirection]: seat.seat,
-  //       },
-  //     }));
-  //     setShowSeatMap((prev) => ({ ...prev, [passengerId]: false })); // Ẩn bản đồ ghế sau khi chọn
-  //     setError(null);
-  //     console.log(
-  //       `Selected seat ${seat.seat} for ${passengerId} in ${flightDirection}`
-  //     );
-  //   } else {
-  //     setError("Ghế này đã được chọn. Vui lòng chọn ghế khác.");
-  //   }
-  // };
   const handleSeatSelect = (passengerId, seat, flightDirection) => {
     const ticketType = passengerTicketTypes[passengerId][flightDirection];
 
@@ -224,52 +199,6 @@ const PassengerService = () => {
     }
   };
 
-  const handleConfirmSeats = async (flightDirection) => {
-    setLoading(true);
-    try {
-      const scheduleId =
-        flightDirection === "departure"
-          ? selectedDepartureTicket.schedule_id
-          : selectedReturnTicket.schedule_id;
-      for (const [passengerId, selections] of Object.entries(seatSelections)) {
-        const seatNumber = selections[flightDirection];
-        if (!seatNumber) continue;
-        const fullName = passengerData[passengerId]?.full_name || "Unknown";
-        console.log(
-          `Assigning seat ${seatNumber} for ${passengerId} in ${flightDirection}`
-        );
-        const response = await fetch("http://localhost:5000/api/seats/assign", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            bookingId,
-            passengerId,
-            fullName,
-            flightDirection,
-            seatNumber,
-            scheduleId,
-            passengerTicketType:
-              passengerTicketTypes[passengerId]?.[flightDirection],
-          }),
-        });
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.message || "Không thể gán ghế");
-        }
-      }
-      alert(
-        `Đã gán ghế cho ${flightDirection === "departure" ? "chuyến đi" : "chuyến về"}`
-      );
-    } catch (err) {
-      console.error("Lỗi khi gán ghế:", err);
-      setError(`Lỗi khi gán ghế: ${err.message}`);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleProceedToPayment = async () => {
     const totalPassengers = passengers.adults + passengers.children;
     const requiredSeats =
@@ -278,6 +207,7 @@ const PassengerService = () => {
       (count, selection) => count + Object.keys(selection || {}).length,
       0
     );
+
     if (assignedSeats < requiredSeats) {
       alert(
         "Vui lòng chọn chỗ ngồi cho tất cả hành khách trước khi thanh toán."
@@ -288,18 +218,40 @@ const PassengerService = () => {
     try {
       setLoading(true);
 
-      // ✅ Xác nhận ghế cả đi và về (nếu có)
-      await handleConfirmSeats("departure");
+      const bookingResponse = await fetch(
+        "http://localhost:5000/api/bookings",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            userId: 1, // Thay bằng userId thực tế nếu có đăng nhập
+            departureScheduleId: selectedDepartureTicket.schedule_id,
+            returnScheduleId: selectedReturnTicket?.schedule_id || null,
+            numPassengers: requiredSeats,
+            totalPrice,
+            passengers: Object.values(passengerData),
+            tripType,
+          }),
+        }
+      );
 
-      if (tripType === "round-trip") {
-        await handleConfirmSeats("return");
+      if (!bookingResponse.ok) {
+        const errorData = await bookingResponse.json();
+        throw new Error(errorData.message || "Lỗi khi tạo booking");
       }
 
-      // ✅ Điều hướng sang trang thanh toán
+      const bookingData = await bookingResponse.json();
+      const newBookingId = bookingData.bookingId;
+
+      await handleConfirmSeats("departure", newBookingId);
+      if (tripType === "round-trip") {
+        await handleConfirmSeats("return", newBookingId);
+      }
+
       navigate("/Payment", {
         state: {
-          bookingId,
-          maDatVe,
+          bookingId: newBookingId,
+          maDatVe: bookingData.maDatVe,
           passengers,
           tripType,
           departure,
@@ -312,10 +264,42 @@ const PassengerService = () => {
         },
       });
     } catch (err) {
-      console.error("Lỗi khi xác nhận ghế trước thanh toán:", err);
-      setError(`Lỗi khi xác nhận ghế: ${err.message}`);
+      console.error("Lỗi khi tạo booking:", err);
+      setError(err.message);
     } finally {
       setLoading(false);
+    }
+  };
+  const handleConfirmSeats = async (flightDirection, bookingIdOverride) => {
+    const scheduleId =
+      flightDirection === "departure"
+        ? selectedDepartureTicket.schedule_id
+        : selectedReturnTicket.schedule_id;
+
+    for (const [passengerId, selections] of Object.entries(seatSelections)) {
+      const seatNumber = selections[flightDirection];
+      if (!seatNumber) continue;
+      const fullName = passengerData[passengerId]?.full_name || "Unknown";
+
+      const response = await fetch("http://localhost:5000/api/seats/assign", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          bookingId: bookingIdOverride,
+          passengerId,
+          fullName,
+          flightDirection,
+          seatNumber,
+          scheduleId,
+          passengerTicketType:
+            passengerTicketTypes[passengerId]?.[flightDirection],
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Không thể gán ghế");
+      }
     }
   };
 
@@ -347,7 +331,7 @@ const PassengerService = () => {
       seatMap
     );
 
-    // Vô hiệu hóa nút nếu hành khách đã chọn ghế cho chuyến hiện tại
+  
     const isSeatSelected = !!seatSelections[passengerId]?.[currentFlight];
 
     return (

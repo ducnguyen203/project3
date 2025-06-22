@@ -186,43 +186,12 @@ const Booking = () => {
     return isValid;
   };
 
-  const handleBooking = async () => {
+  const handleBooking = () => {
     if (!validateForm()) {
       return;
     }
 
     try {
-      const passengersArray = Object.values(passengerData);
-      const sortedPassengersArray = [...passengersArray].sort((a, b) =>
-        a.passenger_type === "Adult" ? -1 : 1
-      );
-
-      const bookingData = {
-        userId: 1,
-        departureScheduleId: selectedDepartureTicket.schedule_id,
-        returnScheduleId: selectedReturnTicket?.schedule_id || null,
-        numPassengers:
-          (passengers.adults + passengers.children + passengers.infants) *
-          (tripType === "round-trip" ? 2 : 1),
-        totalPrice,
-        passengers: sortedPassengersArray,
-        tripType,
-        selectedReturnTicket,
-      };
-
-      console.log("Booking Data:", JSON.stringify(bookingData, null, 2));
-      const response = await fetch("http://localhost:5000/api/bookings", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(bookingData),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Lỗi khi tạo đặt vé");
-      }
-
-      const data = await response.json();
       const enrichedPassengerData = Object.fromEntries(
         Object.entries(passengerData).map(([key, value]) => [
           key,
@@ -240,8 +209,6 @@ const Booking = () => {
 
       navigate("/PassengerService", {
         state: {
-          bookingId: data.bookingId,
-          maDatVe: data.maDatVe,
           passengers,
           tripType,
           departure,
@@ -253,7 +220,7 @@ const Booking = () => {
         },
       });
     } catch (error) {
-      console.error("Lỗi khi tạo đặt vé:", error);
+      console.error("Lỗi khi điều hướng:", error);
       setErrors((prev) => ({ ...prev, global: error.message }));
     }
   };
