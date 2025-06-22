@@ -952,6 +952,7 @@ const Flight = () => {
                                   ? null
                                   : {
                                       ...prices,
+
                                       price_id: prices.price_id,
                                       schedule_id: flights.schedule_id,
                                       flight_id: flights.id,
