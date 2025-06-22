@@ -1,5 +1,6 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { debounce } from "lodash";
 import logo from "../assets/img/logo.png";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowRight } from "@fortawesome/free-solid-svg-icons";
@@ -10,11 +11,11 @@ import {
   FaUser,
   FaChevronDown,
 } from "react-icons/fa";
-
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import style from "../assets/styles/Flight.module.css";
 import FlightCalendar from "../components/FlightCalendar";
+import FlightCard from "../components/FlightCard";
 import dayjs from "dayjs";
 
 const Flight = () => {
@@ -37,6 +38,7 @@ const Flight = () => {
   const inputRefDestination = useRef(null);
   const [flightResults, setFlightResults] = useState([]);
   const [isSearched, setIsSearched] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [shouldAutoSearch, setShouldAutoSearch] = useState(true);
   const [selectedDepartureTicket, setSelectedDepartureTicket] = useState(null);
   const [selectedReturnTicket, setSelectedReturnTicket] = useState(null);
@@ -85,6 +87,67 @@ const Flight = () => {
     }
   }, []);
 
+  const handleSearchFlights = useCallback(
+    debounce(async () => {
+      if (!departure || !destination || !departureDate) {
+        alert("Vui lòng nhập đầy đủ thông tin điểm đi, điểm đến và ngày đi.");
+        return;
+      }
+      if (tripType === "round-trip" && !returnDate) {
+        alert("Vui lòng nhập ngày về.");
+        return;
+      }
+
+      setIsLoading(true);
+      localStorage.setItem(
+        "flightSearchParams",
+        JSON.stringify({
+          tripType,
+          departure,
+          destination,
+          departureDate,
+          returnDate,
+          passengers,
+        })
+      );
+      setFlightResults({});
+      setIsSearched(false);
+      setCurrentDeparturePage(1);
+      setCurrentReturnPage(1);
+      const departureCode = departure.split("(")[1]?.replace(")", "");
+      const destinationCode = destination.split("(")[1]?.replace(")", "");
+      const formattedDepartureDate = dayjs(departureDate).format("YYYY-MM-DD");
+      const formattedReturnDate =
+        returnDate && tripType === "round-trip"
+          ? dayjs(returnDate).format("YYYY-MM-DD")
+          : null;
+
+      let url = `http://localhost:5000/api/flights/search?departure=${departureCode}&destination=${destinationCode}&departureDate=${formattedDepartureDate}`;
+      if (tripType === "round-trip" && formattedReturnDate) {
+        url += `&returnDate=${formattedReturnDate}&tripType=round-trip`;
+      } else {
+        url += `&tripType=one-way`;
+      }
+
+      try {
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error("Không thể tìm kiếm chuyến bay.");
+        }
+        const data = await response.json();
+        setFlightResults(data);
+        setIsSearched(true);
+        console.log("Gửi request tới:", url);
+      } catch (error) {
+        console.error("Lỗi khi tìm chuyến bay:", error);
+        setIsSearched(true);
+      } finally {
+        setIsLoading(false);
+      }
+    }, 800), // Tăng debounce từ 500ms lên 800ms
+    [departure, destination, departureDate, returnDate, tripType, passengers]
+  );
+
   useEffect(() => {
     if (
       shouldAutoSearch &&
@@ -103,62 +166,8 @@ const Flight = () => {
     destination,
     departureDate,
     returnDate,
+    handleSearchFlights,
   ]);
-
-  const handleSearchFlights = async () => {
-    if (!departure || !destination || !departureDate) {
-      alert("Vui lòng nhập đầy đủ thông tin điểm đi, điểm đến và ngày đi.");
-      return;
-    }
-    if (tripType === "round-trip" && !returnDate) {
-      alert("Vui lòng nhập ngày về.");
-      return;
-    }
-
-    localStorage.setItem(
-      "flightSearchParams",
-      JSON.stringify({
-        tripType,
-        departure,
-        destination,
-        departureDate,
-        returnDate,
-        passengers,
-      })
-    );
-    setFlightResults({});
-    setIsSearched(false);
-    setCurrentDeparturePage(1);
-    setCurrentReturnPage(1);
-    const departureCode = departure.split("(")[1]?.replace(")", "");
-    const destinationCode = destination.split("(")[1]?.replace(")", "");
-    const formattedDepartureDate = dayjs(departureDate).format("YYYY-MM-DD");
-    const formattedReturnDate =
-      returnDate && tripType === "round-trip"
-        ? dayjs(returnDate).format("YYYY-MM-DD")
-        : null;
-
-    let url = `http://localhost:5000/api/flights/search?departure=${departureCode}&destination=${destinationCode}&departureDate=${formattedDepartureDate}`;
-    if (tripType === "round-trip" && formattedReturnDate) {
-      url += `&returnDate=${formattedReturnDate}&tripType=round-trip`;
-    } else {
-      url += `&tripType=one-way`;
-    }
-
-    try {
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error("Không thể tìm kiếm chuyến bay.");
-      }
-      const data = await response.json();
-      setFlightResults(data);
-      setIsSearched(true);
-      console.log("Gửi request tới:", url);
-    } catch (error) {
-      console.error("Lỗi khi tìm chuyến bay:", error);
-      setIsSearched(true);
-    }
-  };
 
   const normalizeString = (str) => {
     return str
@@ -170,10 +179,12 @@ const Flight = () => {
 
   useEffect(() => {
     const fetchAirports = async () => {
+      setIsLoading(true);
       const response = await fetch("http://localhost:5000/api/airports");
       const data = await response.json();
       setAirports(data);
       setFilteredAirports(data);
+      setIsLoading(false);
     };
     fetchAirports();
   }, []);
@@ -274,15 +285,25 @@ const Flight = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
 
-  const handleDepartureDateChange = (newDate) => {
-    setDepartureDate(newDate);
-    setShouldAutoSearch(true);
-  };
+  const handleDepartureDateChange = useCallback(
+    (newDate) => {
+      setDepartureDate(newDate);
+      if (departure && destination && (tripType === "one-way" || returnDate)) {
+        setShouldAutoSearch(true);
+      }
+    },
+    [departure, destination, returnDate, tripType]
+  );
 
-  const handleReturnDateChange = (newDate) => {
-    setReturnDate(newDate);
-    setShouldAutoSearch(true);
-  };
+  const handleReturnDateChange = useCallback(
+    (newDate) => {
+      setReturnDate(newDate);
+      if (departure && destination && departureDate) {
+        setShouldAutoSearch(true);
+      }
+    },
+    [departure, destination, departureDate]
+  );
 
   useEffect(() => {
     const handleBeforeUnload = () => {
@@ -451,6 +472,30 @@ const Flight = () => {
       </text>
     </svg>
   );
+
+  // Component Spinner
+  const Spinner = () => (
+    <div className={style.spinner}>
+      <div className={style.spinnerInner}></div>
+    </div>
+  );
+
+  // Component Skeleton Loading - Cập nhật để hiển thị 5 thẻ giả lập
+  const SkeletonLoading = () => (
+    <div className={style.skeletonContainer}>
+      <div className={style.skeletonCalendar}></div>
+      {[...Array(5)].map((_, index) => (
+        <div key={index} className={style.skeletonFlightCard}>
+          <div className={style.skeletonFlightDetails}></div>
+          <div className={style.skeletonTicketPrices}>
+            <div className={style.skeletonPriceCard}></div>
+            <div className={style.skeletonPriceCard}></div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
   const handleContinue = () => {
     if (
       !selectedDepartureTicket ||
@@ -628,7 +673,7 @@ const Flight = () => {
               <FaCalendarAlt className={style.icondate} />
               <DatePicker
                 selected={departureDate}
-                onChange={(date) => setDepartureDate(date)}
+                onChange={handleDepartureDateChange}
                 placeholderText="Chọn ngày đi"
                 minDate={new Date()}
                 dateFormat="dd/MM/yyyy"
@@ -640,7 +685,7 @@ const Flight = () => {
                 <FaCalendarAlt className={style.icondate} />
                 <DatePicker
                   selected={returnDate}
-                  onChange={setReturnDate}
+                  onChange={handleReturnDateChange}
                   placeholderText="Chọn ngày về"
                   minDate={departureDate || new Date()}
                   dateFormat="dd/MM/yyyy"
@@ -653,8 +698,9 @@ const Flight = () => {
             <button
               className={style.searchButton}
               onClick={handleSearchFlights}
+              disabled={isLoading}
             >
-              Tìm Kiếm
+              {isLoading ? "Đang tìm kiếm..." : "Tìm Kiếm"}
             </button>
           </div>
         </div>
@@ -675,13 +721,18 @@ const Flight = () => {
         <div className={style.step}>
           <div className={style.circle}></div>
           <div className={style.stepTitle}>Thanh toán</div>
-          <div className={style.stepDesc}>Thanh toán đề nhận vé máy bay</div>
+          <div className={style.stepDesc}>Thanh toán để nhận vé máy bay</div>
         </div>
         <div className={style.line}></div>
       </div>
       <div className={style.FlightList}>
         <div className={style.mainBlockContent}>
-          <div className={style.FlightSearch_flight_content}>
+          <div
+            className={`${style.FlightSearch_flight_content} ${
+              isLoading ? style.loading : ""
+            }`}
+          >
+            {isLoading && <Spinner />}
             <div className={style.flightSearchTitle}>
               <div className={style.logo}>
                 <div>
@@ -708,12 +759,18 @@ const Flight = () => {
               </div>
             </div>
             <div className={style.flightDetails}>
-              <FlightCalendar
-                departureDate={departureDate}
-                onDateChange={handleDepartureDateChange}
-              />
+              {isLoading ? (
+                <SkeletonLoading />
+              ) : (
+                <FlightCalendar
+                  departureDate={departureDate}
+                  onDateChange={handleDepartureDateChange}
+                />
+              )}
             </div>
-            {currentDepartureFlights?.length > 0 ? (
+            {isLoading ? (
+              <SkeletonLoading />
+            ) : currentDepartureFlights?.length > 0 ? (
               <>
                 {(selectedDepartureTicket
                   ? [
@@ -723,104 +780,14 @@ const Flight = () => {
                       ),
                     ]
                   : currentDepartureFlights
-                ).map((flights) => (
-                  <div
-                    key={flights.id}
-                    className={`${style.content_Flight} ${
-                      selectedDepartureTicket &&
-                      selectedDepartureTicket.flight_id === flights.id &&
-                      flights.prices.some(
-                        (price) =>
-                          price.ticket_type ===
-                          selectedDepartureTicket.ticket_type
-                      )
-                        ? style.selectedFlightCard
-                        : ""
-                    }`}
-                  >
-                    <div className={style.flightDetails}>
-                      <div className={style.schedule}>
-                        <div className={style.time}>
-                          {flights.departure_time}
-                        </div>
-                        <div className={style.airport}>
-                          {flights.departure_airport_code}
-                        </div>
-                      </div>
-                      <div className={style.flightIcon}>
-                        <div>✈</div>
-                        <div>Bay thẳng</div>
-                      </div>
-                      <div className={style.flightInfo}>
-                        <div className={style.time}>{flights.arrival_time}</div>
-                        <div className={style.airport}>
-                          {flights.arrival_airport_code}
-                        </div>
-                      </div>
-                      <div className={style.details}>
-                        <p>Thời gian bay: {flights.duration}</p>
-                        <p>Ngày Bay: {flights.departure_date}</p>
-                        <p>
-                          <a href="#details" className={style.detailsLink}>
-                            Chi tiết hành trình
-                          </a>
-                        </p>
-                      </div>
-                    </div>
-                    <div className={style.ticketPrices}>
-                      {(flights.prices || []).map((prices) => (
-                        <div
-                          key={prices.ticket_type_id}
-                          className={`${style.priceCard} ${
-                            selectedDepartureTicket &&
-                            selectedDepartureTicket.flight_id === flights.id &&
-                            selectedDepartureTicket.ticket_type ===
-                              prices.ticket_type
-                              ? style.selectedPriceCard
-                              : ""
-                          }`}
-                          onClick={() => {
-                            const isSameTicket =
-                              selectedDepartureTicket &&
-                              selectedDepartureTicket.flight_id ===
-                                flights.id &&
-                              selectedDepartureTicket.ticket_type ===
-                                prices.ticket_type;
-
-                            setSelectedDepartureTicket(
-                              isSameTicket
-                                ? null
-                                : {
-                                    ...prices,
-                                    price_id: prices.price_id,
-                                    schedule_id: flights.schedule_id,
-                                    flight_id: flights.id,
-                                    departure_time: flights.departure_time,
-                                    arrival_time: flights.arrival_time,
-                                    departure_date: flights.departure_date,
-                                  }
-                            );
-                            console.log("Selected Departure Ticket:", {
-                              ...prices,
-                              price_id: prices.price_id,
-                              schedule_id: flights.schedule_id,
-                              flight_id: flights.id,
-                              departure_time: flights.departure_time,
-                              arrival_time: flights.arrival_time,
-                              departure_date: flights.departure_date,
-                            });
-                          }}
-                        >
-                          <div className={style.priceType}>
-                            {prices.ticket_type}
-                          </div>
-                          <div className={style.price}>
-                            Từ {prices.price} VNĐ
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                ).map((flight) => (
+                  <FlightCard
+                    key={flight.id}
+                    flight={flight}
+                    selectedTicket={selectedDepartureTicket}
+                    onSelectTicket={setSelectedDepartureTicket}
+                    isDeparture={true}
+                  />
                 ))}
                 {!selectedDepartureTicket && (
                   <div className={style.pagination}>
@@ -840,7 +807,12 @@ const Flight = () => {
           </div>
 
           {tripType === "round-trip" && returnDate && (
-            <div className={style.FlightSearch_flight_content}>
+            <div
+              className={`${style.FlightSearch_flight_content} ${
+                isLoading ? style.loading : ""
+              }`}
+            >
+              {isLoading && <Spinner />}
               <div className={style.flightSearchTitle}>
                 <div className={style.logo}>
                   <div>
@@ -867,12 +839,18 @@ const Flight = () => {
                 </div>
               </div>
               <div className={style.flightDetails}>
-                <FlightCalendar
-                  departureDate={returnDate}
-                  onDateChange={handleReturnDateChange}
-                />
+                {isLoading ? (
+                  <SkeletonLoading />
+                ) : (
+                  <FlightCalendar
+                    departureDate={returnDate}
+                    onDateChange={handleReturnDateChange}
+                  />
+                )}
               </div>
-              {currentReturnFlights?.length > 0 ? (
+              {isLoading ? (
+                <SkeletonLoading />
+              ) : currentReturnFlights?.length > 0 ? (
                 <>
                   {(selectedReturnTicket
                     ? [
@@ -882,97 +860,14 @@ const Flight = () => {
                         ),
                       ]
                     : currentReturnFlights
-                  ).map((flights) => (
-                    <div
-                      key={flights.id}
-                      className={`${style.content_Flight} ${
-                        selectedReturnTicket &&
-                        selectedReturnTicket.flight_id === flights.id &&
-                        flights.prices.some(
-                          (price) =>
-                            price.ticket_type ===
-                            selectedReturnTicket.ticket_type
-                        )
-                          ? style.selectedFlightCard
-                          : ""
-                      }`}
-                    >
-                      <div className={style.flightDetails}>
-                        <div className={style.schedule}>
-                          <div className={style.time}>
-                            {flights.departure_time}
-                          </div>
-                          <div className={style.airport}>
-                            {flights.departure_airport_code}
-                          </div>
-                        </div>
-                        <div className={style.flightIcon}>
-                          <div>✈</div>
-                          <div>Bay thẳng</div>
-                        </div>
-                        <div className={style.flightInfo}>
-                          <div className={style.time}>
-                            {flights.arrival_time}
-                          </div>
-                          <div className={style.airport}>
-                            {flights.arrival_airport_code}
-                          </div>
-                        </div>
-                        <div className={style.details}>
-                          <p>Thời gian bay: {flights.duration}</p>
-                          <p>Ngày Bay: {flights.departure_date}</p>
-                          <p>
-                            <a href="#details" className={style.detailsLink}>
-                              Chi tiết hành trình
-                            </a>
-                          </p>
-                        </div>
-                      </div>
-                      <div className={style.ticketPrices}>
-                        {(flights.prices || []).map((prices) => (
-                          <div
-                            key={prices.ticket_type_id}
-                            className={`${style.priceCard} ${
-                              selectedReturnTicket &&
-                              selectedReturnTicket.flight_id === flights.id &&
-                              selectedReturnTicket.ticket_type ===
-                                prices.ticket_type
-                                ? style.selectedPriceCard
-                                : ""
-                            }`}
-                            onClick={() => {
-                              const isSameTicket =
-                                selectedReturnTicket &&
-                                selectedReturnTicket.flight_id === flights.id &&
-                                selectedReturnTicket.ticket_type ===
-                                  prices.ticket_type;
-
-                              setSelectedReturnTicket(
-                                isSameTicket
-                                  ? null
-                                  : {
-                                      ...prices,
-
-                                      price_id: prices.price_id,
-                                      schedule_id: flights.schedule_id,
-                                      flight_id: flights.id,
-                                      departure_time: flights.departure_time,
-                                      arrival_time: flights.arrival_time,
-                                      departure_date: flights.departure_date,
-                                    }
-                              );
-                            }}
-                          >
-                            <div className={style.priceType}>
-                              {prices.ticket_type}
-                            </div>
-                            <div className={style.price}>
-                              Từ {prices.price} VNĐ
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
+                  ).map((flight) => (
+                    <FlightCard
+                      key={flight.id}
+                      flight={flight}
+                      selectedTicket={selectedReturnTicket}
+                      onSelectTicket={setSelectedReturnTicket}
+                      isDeparture={false}
+                    />
                   ))}
                   {!selectedReturnTicket && (
                     <div className={style.pagination}>

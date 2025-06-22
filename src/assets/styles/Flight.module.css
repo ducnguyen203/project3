@@ -12,7 +12,7 @@ body {
   margin-left: 140px;
 }
 .radiobutton {
-  cursor: pointer; /* Changes the cursor to a pointer on hover */
+  cursor: pointer;
 }
 .radio2 {
   margin-left: -22px;
@@ -47,7 +47,6 @@ body {
 .inputGroup input:focus,
 .inputGroup select:focus {
   outline: none;
-
   border-color: #00c8ff;
 }
 .inputGroup input,
@@ -58,13 +57,12 @@ body {
   position: relative;
 }
 .sm {
-  position: absolute; /* Đặt nhãn ở dạng tuyệt đối */
-  top: -10px; /* Căn chỉnh lên trên cùng */
-  left: 30px; /* Điều chỉnh vị trí bên trái nếu cần */
-  background: white; /* Nền trắng cho nhãn */
-  padding: 0 5px; /* Thêm padding cho nhãn để tạo khoảng cách với input */
-
-  transition: 0.2s; /* Tùy chọn: Thêm hiệu ứng chuyển tiếp */
+  position: absolute;
+  top: -10px;
+  left: 30px;
+  background: white;
+  padding: 0 5px;
+  transition: 0.2s;
   font-size: 14px;
   line-height: 20px;
   font-weight: 500;
@@ -76,7 +74,6 @@ body {
   margin-bottom: 15px;
   justify-content: center;
 }
-
 .inputquanty input,
 .inputquanty button {
   position: relative;
@@ -88,14 +85,14 @@ body {
   align-items: center;
   gap: 8px;
   fill: var(--base-white);
-  width: 175px; /* Đảm bảo chiều rộng giống nhau */
+  width: 175px;
   height: 25px;
 }
 .inputquanty {
-  position: relative; /* Đặt container ở dạng tương đối */
+  position: relative;
 }
 .searchButton {
-  width: 200px; /* Đảm bảo chiều rộng giống nhau */
+  width: 200px;
   height: 58px;
   border-radius: 28px;
   border: 1px solid gainsboro;
@@ -114,10 +111,9 @@ body {
 }
 .Maininput {
   display: flex;
-  justify-content: center; /* Căn giữa các phần tử theo chiều ngang */
-  margin: 0 auto; /* Căn giữa container con */
+  justify-content: center;
+  margin: 0 auto;
 }
-
 .Block {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -128,11 +124,9 @@ body {
 .inputGroup {
   position: relative;
 }
-
 .inputGroup input {
   padding-left: 40px;
 }
-
 .inputGroup svg {
   position: absolute;
   left: 14px;
@@ -161,7 +155,6 @@ body {
 .passengersTotal {
   margin: auto;
   padding-left: 10px;
-
   background-color: white;
   margin: 0 auto;
   display: flex;
@@ -173,12 +166,10 @@ body {
 .passengersTotal:hover {
   background-color: white;
 }
-
 .passengersTotal:hover svg,
 .passengersTotal:hover .quantityPassenger {
   color: #00c8ff;
 }
-
 .quantityPassenger {
   margin-left: 6px;
   margin-right: 6px;
@@ -186,7 +177,6 @@ body {
 .passengers {
   position: relative;
 }
-
 .dropdown {
   position: absolute;
   top: 100%;
@@ -199,7 +189,6 @@ body {
   z-index: 2;
   display: none;
 }
-
 .dropdown.show {
   display: block;
 }
@@ -216,12 +205,12 @@ body {
   background-color: ghostwhite;
 }
 .dropdown .sm {
-  position: absolute; /* Đặt nhãn ở dạng tuyệt đối */
-  top: -10px; /* Căn chỉnh lên trên cùng */
-  left: 12px; /* Điều chỉnh vị trí bên trái nếu cần */
+  position: absolute;
+  top: -10px;
+  left: 12px;
   color: dimgrey;
-  padding: 0 5px; /* Thêm padding cho nhãn để tạo khoảng cách với input */
-  transition: 0.2s; /* Tùy chọn: Thêm hiệu ứng chuyển tiếp */
+  padding: 0 5px;
+  transition: 0.2s;
   font-size: 14px;
   line-height: 20px;
   font-weight: 500;
@@ -235,36 +224,25 @@ body {
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 5px;
-  font-size: 16px;
 }
-
-/* Hiển thị bảng lịch đẹp hơn */
 .react-datepicker {
   border-radius: 8px;
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
 }
-
-/* Header lịch */
 .react-datepicker__header {
   background-color: #fff;
   border-bottom: 1px solid #ddd;
 }
-
-/* Ngày trong lịch */
 .react-datepicker__day {
   padding: 8px;
   font-size: 14px;
-  border-radius: 50%; /* Bo tròn các ngày */
+  border-radius: 50%;
 }
-
-/* Ngày được chọn */
 .react-datepicker__day--selected {
   background-color: red !important;
   color: white !important;
   border-radius: 50%;
 }
-
-/* Ngày bị disabled (quá khứ) */
 .react-datepicker__day--disabled {
   color: #ccc !important;
   text-decoration: line-through;
@@ -277,10 +255,9 @@ body {
   width: 1250px;
   margin: 0 auto;
 }
-
 .FlightSearch_flight_content {
-  grid-template-columns: 2fr 1fr; /* Điều chỉnh tỉ lệ giữa flightDetails và ticketPrices */
-  gap: 20px; /* Khoảng cách giữa hai khối */
+  grid-template-columns: 2fr 1fr;
+  gap: 20px;
   align-items: center;
   width: 100%;
   border: 1px solid var(--gray-200, #eaecf0);
@@ -288,6 +265,15 @@ body {
   box-shadow: var(--shadow-sm);
   border-radius: 20px;
   margin-bottom: 45px;
+  position: relative;
+  overflow: hidden; /* Đảm bảo spinner không bị tràn ra ngoài */
+}
+.FlightSearch_flight_content.loading {
+  filter: blur(3px);
+  opacity: 0.7;
+  transition:
+    filter 0.3s ease,
+    opacity 0.3s ease;
 }
 .content_Flight {
   display: flex;
@@ -295,13 +281,8 @@ body {
   background: var(--base-white, #fff);
   box-shadow: var(--shadow-sm);
   border-radius: 20px;
-  margin-left: 7px;
-  margin-right: 7px;
-  margin-bottom: 10px;
-  margin-top: 8px;
+  margin: 8px 7px 10px 7px;
 }
-
-/*lich*/
 .FlightSidebar_filter {
   width: 30%;
   border: 1px solid var(--gray-200, #eaecf0);
@@ -312,7 +293,6 @@ body {
   max-height: 325px;
   height: auto;
 }
-
 .flightDetails {
   display: flex;
   justify-content: space-between;
@@ -330,7 +310,6 @@ body {
   flex: 1;
   text-align: center;
 }
-
 .time {
   font-size: 2rem;
   font-weight: 400;
@@ -338,18 +317,15 @@ body {
   font-family: OpenSans-Regular;
   letter-spacing: normal;
 }
-
 .airport,
 .station {
   margin-top: 5px;
 }
-
 .ticketPrices {
   display: flex;
   justify-content: space-between;
   width: 40%;
 }
-
 .priceCard {
   border-left: 1px solid #b0bec5;
   padding: 15px;
@@ -362,54 +338,48 @@ body {
   background-color: #418fb4;
   cursor: pointer;
 }
-
 .priceType {
   color: #00897b;
   font-size: 15px;
 }
-
 .price {
   color: #004d40;
   font-size: 15px;
 }
-
 .detailsLink {
   color: #03a9f4;
   text-decoration: none;
 }
 .calendarContainer {
   display: flex;
-  gap: 12px; /* Khoảng cách giữa các ngày */
+  gap: 12px;
   justify-content: center;
   align-items: center;
   padding: 10px;
 }
-
 .calendarItem {
   background: #ffffff;
   padding: 10px;
   border-radius: 8px;
   text-align: center;
-  width: 70px; /* Độ rộng của mỗi ô */
+  width: 70px;
   cursor: pointer;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease-in-out;
+  transition:
+    background 0.2s ease,
+    border 0.2s ease;
 }
-
 .calendarItem:hover {
   background: #e0f7fa;
 }
-
 .selected {
   background: #cceff6;
   border: 1px solid #007bff;
 }
-
 .weekday {
   font-size: 14px;
   color: #666;
 }
-
 .day {
   font-size: 18px;
   font-weight: bold;
@@ -421,64 +391,42 @@ body {
   background-color: white;
   border: 1px solid #ccc;
   border-radius: 4px;
-  max-height: 200px; /* Giới hạn chiều cao */
-  overflow-y: scroll; /* Cho phép cuộn */
+  max-height: 200px;
+  overflow-y: scroll;
   top: 59px;
-  width: 96%; /* Đặt chiều rộng bằng với input */
+  width: 96%;
 }
-
-/* Hiển thị thanh cuộn với chiều rộng nhỏ và màu xám */
 .dropdownAirport::-webkit-scrollbar {
-  width: 3px; /* Chiều rộng của thanh cuộn */
+  width: 3px;
 }
-
 .dropdownAirport::-webkit-scrollbar-thumb {
-  background: #ccc; /* Màu của thanh cuộn */
-  border-radius: 4px; /* Bo góc cho thanh cuộn */
+  background: #ccc;
+  border-radius: 4px;
 }
-
 .dropdownAirport::-webkit-scrollbar-thumb:hover {
-  background: #aaa; /* Màu khi hover lên thanh cuộn */
+  background: #aaa;
 }
-
 .suggestionListAirport {
   list-style: none;
   padding: 0;
   margin: 0;
 }
-
 .suggestionItemAirport {
   padding: 10px;
   cursor: pointer;
-  width: calc(
-    100% - 20px
-  ); /* Đảm bảo chiều rộng bằng với dropdown, trừ padding */
-  box-sizing: border-box; /* Đảm bảo padding không ảnh hưởng đến chiều rộng */
+  width: calc(100% - 20px);
+  box-sizing: border-box;
   margin: 0 auto;
   font-size: 15px;
 }
-/* Flight.module.css */
-
-/* .noFlight {
-  text-align: center; 
-  font-size: 18px; 
-  color: #ff0000; 
-  margin: 20px 0;
-  padding: 15px; 
-  border: 1px solid #ffcccc; 
-  background-color: #ffe6e6; 
-  border-radius: 5px; 
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); 
-} */
 h3 {
   margin-left: 15px;
 }
 .flightSearchTitle {
   border-bottom: 1px solid gainsboro;
   display: flex;
-  align-items: center; /* Căn giữa theo chiều ngang */
+  align-items: center;
 }
-
 .logoImg {
   max-width: 90px;
   margin-left: 10px;
@@ -511,12 +459,11 @@ h3 {
   text-decoration: none;
 }
 .bookingInfo > div {
-  border-bottom: 1px solid #ccc; /* Thay đổi màu sắc và độ dày nếu cần */
+  border-bottom: 1px solid #ccc;
   padding-left: 10px;
 }
-
 .bookingInfo > div:last-child {
-  border-bottom: none; /* Bỏ border-bottom cho div cuối cùng */
+  border-bottom: none;
 }
 .pagination {
   display: flex;
@@ -580,7 +527,6 @@ h3 {
   background-color: #418fb4;
   color: white;
 }
-
 .selectedFlightCard {
   border: 1px solid var(--primary-base, #77dada);
   background: #f3ffff;
@@ -588,11 +534,6 @@ h3 {
   box-shadow: var(--shadow-sm);
   transition: all 0.2s ease;
 }
-
-/* Flight.module.css */
-
-/* Thanh tiến trình (stepper) */
-
 .stepper {
   display: flex;
   justify-content: space-between;
@@ -603,14 +544,12 @@ h3 {
   padding: 0 20px;
   z-index: 0;
 }
-
 .step {
   flex: 1;
   text-align: center;
   position: relative;
   z-index: 2;
 }
-
 .circle {
   width: 15px;
   height: 15px;
@@ -623,12 +562,10 @@ h3 {
     background-color 0.3s ease,
     box-shadow 0.3s ease;
 }
-
 .step .active.circle {
-  background-color: #00bcd4 !important; /* Tăng specificity và dùng !important để tránh ghi đè */
+  background-color: #00bcd4 !important;
   box-shadow: 0 0 0 5px #b2ebf2 !important;
 }
-
 .stepTitle {
   font-weight: bold;
   margin-top: 10px;
@@ -636,20 +573,16 @@ h3 {
   font-size: 15px;
   transition: color 0.3s ease;
 }
-
 .stepDesc {
   color: #555;
   font-size: 12px;
   margin-top: 5px;
   transition: color 0.3s ease;
 }
-
 .step .active.stepTitle,
 .step .active.stepDesc {
-  color: #00bcd4 !important; /* Tăng specificity và dùng !important để tránh ghi đè */
+  color: #00bcd4 !important;
 }
-
-/* Đường thẳng chính cho toàn bộ stepper (màu xám) */
 .stepper::before {
   content: "";
   position: absolute;
@@ -660,8 +593,6 @@ h3 {
   background-color: #eee;
   z-index: 1;
 }
-
-/* Đường thẳng tô màu xanh từ đầu đến bước active */
 .stepper::after {
   content: "";
   position: absolute;
@@ -672,18 +603,14 @@ h3 {
   background-color: #00bcd4;
   z-index: 1;
 }
-
-/* Hiệu ứng hover chỉ áp dụng khi có class hoverable */
 .step .hoverable:hover .circle {
   background-color: #00bcd4;
   cursor: pointer;
 }
-
 .step .hoverable:hover .stepTitle,
 .step .hoverable:hover .stepDesc {
   color: #00bcd4;
 }
-
 .totalAmount button {
   width: 90px;
   height: 35px;
@@ -696,4 +623,90 @@ h3 {
 .totalAmount button:hover {
   background: #ff9900;
   cursor: pointer;
+}
+
+/* Style cho Spinner */
+.spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 50px;
+  height: 50px;
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #007bff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  z-index: 10;
+}
+.spinnerInner {
+  width: 100%;
+  height: 100%;
+}
+@keyframes spin {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+/* Style cho Skeleton Loading */
+.skeletonContainer {
+  width: 100%;
+  position: relative;
+}
+.skeletonCalendar {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  padding: 10px;
+}
+.skeletonCalendar::after {
+  content: "";
+  width: 70px;
+  height: 60px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: skeletonLoading 1.5s infinite;
+  border-radius: 8px;
+}
+.skeletonFlightCard {
+  display: flex;
+  border: 1px solid #eaecf0;
+  border-radius: 20px;
+  margin: 8px 7px 10px 7px;
+  padding: 15px;
+}
+.skeletonFlightDetails {
+  width: 60%;
+  height: 60px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: skeletonLoading 1.5s infinite;
+  border-radius: 8px;
+}
+.skeletonTicketPrices {
+  display: flex;
+  justify-content: space-between;
+  width: 40%;
+  padding: 15px;
+}
+.skeletonPriceCard {
+  flex: 1;
+  height: 60px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: skeletonLoading 1.5s infinite;
+  border-radius: 8px;
+  margin: 0 5px;
+}
+@keyframes skeletonLoading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }

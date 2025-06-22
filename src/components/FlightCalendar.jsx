@@ -1,18 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, memo, useCallback } from "react";
+import { debounce } from "lodash";
 import style from "../assets/styles/Flight.module.css";
 
 const FlightCalendar = ({ departureDate, onDateChange }) => {
-  const defaultDate = departureDate ? new Date(departureDate) : new Date();
-  const [selectedDate, setSelectedDate] = useState(defaultDate);
-  const [dates, setDates] = useState(getSurroundingDates(defaultDate));
+  const [dates, setDates] = useState(getSurroundingDates(departureDate));
 
-  // ✅ Thêm useEffect này để cập nhật khi props departureDate thay đổi
   useEffect(() => {
-    const updatedDate = departureDate ? new Date(departureDate) : new Date();
-    setSelectedDate(updatedDate);
-    setDates(getSurroundingDates(updatedDate));
+    setDates(getSurroundingDates(departureDate));
   }, [departureDate]);
-  // Hàm tạo danh sách 9 ngày (4 ngày trước, ngày hiện tại, 4 ngày sau)
+
   function getSurroundingDates(date) {
     if (!date) return [];
     const dates = [];
@@ -24,30 +20,31 @@ const FlightCalendar = ({ departureDate, onDateChange }) => {
     return dates;
   }
 
-  //Xử lý khi click vào một ngày
+  const debouncedDateChange = useCallback(
+    debounce((date) => {
+      onDateChange(date);
+    }, 500),
+    [onDateChange]
+  );
+
   const handleDateClick = (date, index) => {
     if (index === dates.length - 1) {
       const newStartDate = new Date(date.getTime());
       newStartDate.setDate(newStartDate.getDate() + 1);
-      const newDates = getSurroundingDates(newStartDate);
-      setDates(newDates);
-      setSelectedDate(date);
-      onDateChange(date);
+      setDates(getSurroundingDates(newStartDate));
+      debouncedDateChange(date);
       return;
     }
 
     if (index === 0) {
       const newStartDate = new Date(date.getTime());
       newStartDate.setDate(newStartDate.getDate() - 5);
-      const newDates = getSurroundingDates(newStartDate);
-      setDates(newDates);
-      setSelectedDate(date);
-      onDateChange(date);
+      setDates(getSurroundingDates(newStartDate));
+      debouncedDateChange(date);
       return;
     }
 
-    setSelectedDate(date);
-    onDateChange(date);
+    debouncedDateChange(date);
   };
 
   return (
@@ -56,7 +53,7 @@ const FlightCalendar = ({ departureDate, onDateChange }) => {
         <div
           key={index}
           className={`${style.calendarItem} ${
-            date.toDateString() === selectedDate.toDateString()
+            departureDate && date.getTime() === departureDate.getTime()
               ? style.selected
               : ""
           }`}
@@ -76,4 +73,4 @@ const FlightCalendar = ({ departureDate, onDateChange }) => {
   );
 };
 
-export default FlightCalendar;
+export default memo(FlightCalendar);
