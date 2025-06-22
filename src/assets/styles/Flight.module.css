@@ -266,7 +266,7 @@ body {
   border-radius: 20px;
   margin-bottom: 45px;
   position: relative;
-  overflow: hidden; /* Đảm bảo spinner không bị tràn ra ngoài */
+  overflow: hidden;
 }
 .FlightSearch_flight_content.loading {
   filter: blur(3px);
@@ -611,20 +611,43 @@ h3 {
 .step .hoverable:hover .stepDesc {
   color: #00bcd4;
 }
-.totalAmount button {
+.totalAmount {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 11px;
+}
+.totalAmount_price {
+  flex: 1;
+  margin: 0;
+  font-size: 14px;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.totalAmount_price strong {
+  font-size: 16px;
+  color: #004d40;
+}
+.totalAmount_button {
+  flex: 0 0 90px;
+}
+.totalAmount_button button {
   width: 90px;
   height: 35px;
   border-radius: 20px;
   border: 1px solid gainsboro;
-  margin-left: 40px;
   background-color: #007bff;
-  margin-bottom: 10px;
-}
-.totalAmount button:hover {
-  background: #ff9900;
+  color: white;
+  font-size: 14px;
   cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-right: 5px;
 }
-
+.totalAmount_button button:hover {
+  background: #ff9900;
+}
 /* Style cho Spinner */
 .spinner {
   position: absolute;
@@ -651,7 +674,6 @@ h3 {
     transform: translate(-50%, -50%) rotate(360deg);
   }
 }
-
 /* Style cho Skeleton Loading */
 .skeletonContainer {
   width: 100%;

@@ -17,21 +17,17 @@ const Booking = () => {
 
   const [sections, setSections] = useState(() => {
     const initialSections = {};
-    for (let i = 0; i < passengers.adults; i++) {
+    for (let i = 0; i < passengers.adults; i++)
       initialSections[`adult_${i}`] = true;
-    }
-    for (let i = 0; i < passengers.children; i++) {
+    for (let i = 0; i < passengers.children; i++)
       initialSections[`child_${i}`] = true;
-    }
-    for (let i = 0; i < passengers.infants; i++) {
+    for (let i = 0; i < passengers.infants; i++)
       initialSections[`infant_${i}`] = true;
-    }
     return initialSections;
   });
 
   const [passengerData, setPassengerData] = useState(() => {
     const initialData = {};
-    // Gán dữ liệu cho người lớn
     for (let i = 0; i < passengers.adults; i++) {
       initialData[`adult_${i}`] = {
         passenger_type: "Adult",
@@ -45,7 +41,6 @@ const Booking = () => {
         price_id_return: selectedReturnTicket?.price_id || null,
       };
     }
-    // Gán dữ liệu cho trẻ em
     for (let i = 0; i < passengers.children; i++) {
       initialData[`child_${i}`] = {
         passenger_type: "Child",
@@ -56,7 +51,6 @@ const Booking = () => {
         price_id_return: selectedReturnTicket?.price_id || null,
       };
     }
-    // Gán dữ liệu cho em bé
     for (let i = 0; i < passengers.infants; i++) {
       initialData[`infant_${i}`] = {
         passenger_type: "Infant",
@@ -70,21 +64,18 @@ const Booking = () => {
     return initialData;
   });
 
+  const [errors, setErrors] = useState({});
+
   const toggleSection = (section) => {
-    setSections((prev) => ({
-      ...prev,
-      [section]: !prev[section],
-    }));
+    setSections((prev) => ({ ...prev, [section]: !prev[section] }));
   };
 
   const handleInputChange = (section, field, value) => {
     setPassengerData((prev) => ({
       ...prev,
-      [section]: {
-        ...prev[section],
-        [field]: value,
-      },
+      [section]: { ...prev[section], [field]: value },
     }));
+    setErrors((prev) => ({ ...prev, [`${section}_${field}`]: "" }));
   };
 
   const today = new Date();
@@ -118,152 +109,90 @@ const Booking = () => {
     .toISOString()
     .split("T")[0];
 
-  // const handleBooking = async () => {
-  //   try {
-  //     // Kiểm tra price_id và các trường bắt buộc trước khi gửi
-  //     const passengersArray = Object.values(passengerData);
-  //     for (const passenger of passengersArray) {
-  //       if (
-  //         !passenger.price_id_departure ||
-  //         (tripType === "round-trip" && !passenger.price_id_return)
-  //       ) {
-  //         throw new Error(
-  //           `Price ID thiếu cho hành khách: ${passenger.full_name || passenger.passenger_type}`
-  //         );
-  //       }
+  const validateForm = () => {
+    const newErrors = {};
+    let isValid = true;
+    const passengersArray = Object.entries(passengerData);
 
-  //       if (
-  //         !passenger.full_name ||
-  //         !passenger.date_of_birth ||
-  //         !passenger.gender
-  //       ) {
-  //         throw new Error(
-  //           `Thiếu thông tin bắt buộc cho hành khách: ${passenger.full_name || passenger.passenger_type}`
-  //         );
-  //       }
-  //       if (
-  //         passenger.passenger_type === "Adult" &&
-  //         (!passenger.email || !passenger.phone || !passenger.cccd)
-  //       ) {
-  //         throw new Error(
-  //           `Hành khách người lớn cần email, số điện thoại và CCCD: ${passenger.full_name}`
-  //         );
-  //       }
-  //     }
+    for (const [section, passenger] of passengersArray) {
+      if (!passenger.full_name.trim()) {
+        newErrors[`${section}_full_name`] = "Họ và tên không được để trống";
+        isValid = false;
+      } else if (!/^[A-Za-zÀ-ỹ\s]+$/.test(passenger.full_name)) {
+        newErrors[`${section}_full_name`] =
+          "Họ và tên chỉ chứa chữ cái và khoảng trắng";
+        isValid = false;
+      }
 
-  //     // Kiểm tra có ít nhất một người lớn nếu có trẻ em hoặc em bé
-  //     const hasChildrenOrInfants = passengersArray.some(
-  //       (p) => p.passenger_type === "Child" || p.passenger_type === "Infant"
-  //     );
-  //     const hasAdults = passengersArray.some(
-  //       (p) => p.passenger_type === "Adult"
-  //     );
-  //     if (hasChildrenOrInfants && !hasAdults) {
-  //       throw new Error(
-  //         "Trẻ em hoặc em bé phải có ít nhất một người lớn đi cùng"
-  //       );
-  //     }
+      if (!passenger.gender) {
+        newErrors[`${section}_gender`] = "Vui lòng chọn giới tính";
+        isValid = false;
+      }
 
-  //     // Sắp xếp passengers để gửi Adult trước
-  //     const sortedPassengersArray = [...passengersArray].sort((a, b) =>
-  //       a.passenger_type === "Adult" ? -1 : 1
-  //     );
+      if (!passenger.date_of_birth) {
+        newErrors[`${section}_date_of_birth`] = "Ngày sinh không được để trống";
+        isValid = false;
+      }
 
-  //     const bookingData = {
-  //       userId: 1, // Thay bằng userId thực tế từ xác thực
-  //       departureScheduleId: selectedDepartureTicket.schedule_id,
-  //       returnScheduleId: selectedReturnTicket?.schedule_id || null,
-  //       numPassengers:
-  //         (passengers.adults + passengers.children + passengers.infants) *
-  //         (tripType === "round-trip" ? 2 : 1),
-  //       totalPrice,
-  //       passengers: sortedPassengersArray,
-  //       tripType,
-  //       selectedReturnTicket, // Thêm để backend lấy price_id cho chiều về
-  //     };
+      if (passenger.passenger_type === "Adult") {
+        if (!passenger.email.trim()) {
+          newErrors[`${section}_email`] = "Email không được để trống";
+          isValid = false;
+        } else if (!/^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(passenger.email)) {
+          newErrors[`${section}_email`] = "Email phải có định dạng @gmail.com";
+          isValid = false;
+        }
 
-  //     console.log("Booking Data:", JSON.stringify(bookingData, null, 2));
-  //     console.log(passengersArray);
-  //     const response = await fetch("http://localhost:5000/api/bookings", {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify(bookingData),
-  //     });
+        if (!passenger.phone.trim()) {
+          newErrors[`${section}_phone`] = "Số điện thoại không được để trống";
+          isValid = false;
+        } else if (!/^\+?[0-9]{10,15}$/.test(passenger.phone)) {
+          newErrors[`${section}_phone`] =
+            "Số điện thoại phải chứa 10-15 chữ số";
+          isValid = false;
+        }
 
-  //     if (!response.ok) {
-  //       const errorData = await response.json();
-  //       throw new Error(errorData.message || "Lỗi khi tạo đặt vé");
-  //     }
+        if (!passenger.cccd.trim()) {
+          newErrors[`${section}_cccd`] = "CCCD không được để trống";
+          isValid = false;
+        } else if (!/^\d{12}$/.test(passenger.cccd)) {
+          newErrors[`${section}_cccd`] = "CCCD phải chứa 12 chữ số";
+          isValid = false;
+        }
+      }
 
-  //     const data = await response.json();
-  //     alert(`Tạo đặt vé thành công! Mã đặt vé: ${data.maDatVe}`);
-  //     navigate("/PassengerService", {
-  //       state: {
-  //         bookingId: data.bookingId,
-  //         maDatVe: data.maDatVe,
-  //         passengers,
-  //         tripType,
-  //         departure,
-  //         destination,
-  //         selectedDepartureTicket,
-  //         selectedReturnTicket,
-  //         totalPrice,
-  //         passengerData,
-  //       },
-  //     });
-  //   } catch (error) {
-  //     console.error("Lỗi khi tạo đặt vé:", error);
-  //     alert(`Không thể tạo đặt vé: ${error.message}`);
-  //   }
-  // };
+      if (
+        !passenger.price_id_departure ||
+        (tripType === "round-trip" && !passenger.price_id_return)
+      ) {
+        newErrors[`${section}_price_id`] = "Price ID thiếu";
+        isValid = false;
+      }
+    }
+
+    const hasChildrenOrInfants = passengersArray.some(
+      ([_, p]) => p.passenger_type === "Child" || p.passenger_type === "Infant"
+    );
+    const hasAdults = passengersArray.some(
+      ([_, p]) => p.passenger_type === "Adult"
+    );
+    if (hasChildrenOrInfants && !hasAdults) {
+      newErrors.global =
+        "Trẻ em hoặc em bé phải có ít nhất một người lớn đi cùng";
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
 
   const handleBooking = async () => {
+    if (!validateForm()) {
+      return;
+    }
+
     try {
       const passengersArray = Object.values(passengerData);
-      for (const passenger of passengersArray) {
-        if (
-          !passenger.price_id_departure ||
-          (tripType === "round-trip" && !passenger.price_id_return)
-        ) {
-          throw new Error(
-            `Price ID thiếu cho hành khách: ${passenger.full_name || passenger.passenger_type}`
-          );
-        }
-
-        if (
-          !passenger.full_name ||
-          !passenger.date_of_birth ||
-          !passenger.gender
-        ) {
-          throw new Error(
-            `Thiếu thông tin bắt buộc cho hành khách: ${passenger.full_name || passenger.passenger_type}`
-          );
-        }
-
-        if (
-          passenger.passenger_type === "Adult" &&
-          (!passenger.email || !passenger.phone || !passenger.cccd)
-        ) {
-          throw new Error(
-            `Hành khách người lớn cần email, số điện thoại và CCCD: ${passenger.full_name}`
-          );
-        }
-      }
-
-      const hasChildrenOrInfants = passengersArray.some(
-        (p) => p.passenger_type === "Child" || p.passenger_type === "Infant"
-      );
-      const hasAdults = passengersArray.some(
-        (p) => p.passenger_type === "Adult"
-      );
-      if (hasChildrenOrInfants && !hasAdults) {
-        throw new Error(
-          "Trẻ em hoặc em bé phải có ít nhất một người lớn đi cùng"
-        );
-      }
-
       const sortedPassengersArray = [...passengersArray].sort((a, b) =>
         a.passenger_type === "Adult" ? -1 : 1
       );
@@ -294,9 +223,6 @@ const Booking = () => {
       }
 
       const data = await response.json();
-      alert(`Tạo đặt vé thành công! Mã đặt vé: ${data.maDatVe}`);
-
-      // ✅ GẮN THÊM ticket_type_departure & ticket_type_return
       const enrichedPassengerData = Object.fromEntries(
         Object.entries(passengerData).map(([key, value]) => [
           key,
@@ -323,12 +249,12 @@ const Booking = () => {
           selectedDepartureTicket,
           selectedReturnTicket,
           totalPrice,
-          passengerData: enrichedPassengerData, // ✅ DÙNG BẢN ĐÃ GẮN ticket_type
+          passengerData: enrichedPassengerData,
         },
       });
     } catch (error) {
       console.error("Lỗi khi tạo đặt vé:", error);
-      alert(`Không thể tạo đặt vé: ${error.message}`);
+      setErrors((prev) => ({ ...prev, global: error.message }));
     }
   };
 
@@ -338,9 +264,9 @@ const Booking = () => {
         className={style.passenger_type}
         onClick={() => toggleSection(`adult_${index}`)}
       >
-        Người lớn {index + 1}
+        Người lớn {index + 1} (Trên 12 tuổi)
         <span className={style.toggle_icon}>
-          {sections[`adult_${index}`] ? "-" : "+"}
+          {sections[`adult_${index}`] ? "−" : "+"}
         </span>
       </div>
       <div
@@ -348,41 +274,47 @@ const Booking = () => {
       >
         <div className={style.form_group}>
           <div className={style.gender}>
-            <label className={style.label}>Giới tính</label>
+            <label className={style.label}>Giới tính*</label>
             <select
-              className={style.input}
+              className={`${style.input} ${errors[`adult_${index}_gender`] ? style.error : ""}`}
               value={passengerData[`adult_${index}`].gender}
               onChange={(e) =>
                 handleInputChange(`adult_${index}`, "gender", e.target.value)
               }
-              required
             >
               <option value="">Chọn giới tính</option>
               <option value="Male">Nam</option>
               <option value="Female">Nữ</option>
             </select>
+            {errors[`adult_${index}_gender`] && (
+              <span className={style.error_message}>
+                {errors[`adult_${index}_gender`]}
+              </span>
+            )}
           </div>
           <div className={style.full_name}>
-            <label className={style.label}>Họ và tên</label>
+            <label className={style.label}>Họ và tên*</label>
             <input
               type="text"
-              className={style.input}
+              className={`${style.input} ${errors[`adult_${index}_full_name`] ? style.error : ""}`}
               placeholder="Nhập họ và tên"
               value={passengerData[`adult_${index}`].full_name}
               onChange={(e) =>
                 handleInputChange(`adult_${index}`, "full_name", e.target.value)
               }
-              required
-              pattern="[A-Za-zÀ-ỹ\s]+"
-              title="Họ và tên chỉ chứa chữ cái và khoảng trắng"
             />
+            {errors[`adult_${index}_full_name`] && (
+              <span className={style.error_message}>
+                {errors[`adult_${index}_full_name`]}
+              </span>
+            )}
           </div>
         </div>
         <div className={style.form_group}>
-          <label className={style.label}>Ngày sinh</label>
+          <label className={style.label}>Ngày sinh*</label>
           <input
             type="date"
-            className={style.input}
+            className={`${style.input} ${errors[`adult_${index}_date_of_birth`] ? style.error : ""}`}
             max={maxAdultDate}
             value={passengerData[`adult_${index}`].date_of_birth}
             onChange={(e) =>
@@ -392,53 +324,63 @@ const Booking = () => {
                 e.target.value
               )
             }
-            required
           />
+          {errors[`adult_${index}_date_of_birth`] && (
+            <span className={style.error_message}>
+              {errors[`adult_${index}_date_of_birth`]}
+            </span>
+          )}
         </div>
         <div className={style.form_group}>
-          <label className={style.label}>Email</label>
+          <label className={style.label}>Email*</label>
           <input
             type="email"
-            className={style.input}
+            className={`${style.input} ${errors[`adult_${index}_email`] ? style.error : ""}`}
             placeholder="Nhập email"
             value={passengerData[`adult_${index}`].email}
             onChange={(e) =>
               handleInputChange(`adult_${index}`, "email", e.target.value)
             }
-            required
-            pattern="[a-zA-Z0-9._%+-]+@gmail\.com"
-            title="Email phải có định dạng @gmail.com"
           />
+          {errors[`adult_${index}_email`] && (
+            <span className={style.error_message}>
+              {errors[`adult_${index}_email`]}
+            </span>
+          )}
         </div>
         <div className={style.form_group}>
-          <label className={style.label}>Số điện thoại</label>
+          <label className={style.label}>Số điện thoại*</label>
           <input
             type="tel"
-            className={style.input}
+            className={`${style.input} ${errors[`adult_${index}_phone`] ? style.error : ""}`}
             placeholder="Nhập số điện thoại"
             value={passengerData[`adult_${index}`].phone}
             onChange={(e) =>
               handleInputChange(`adult_${index}`, "phone", e.target.value)
             }
-            required
-            pattern="\+?[0-9]{10,15}"
-            title="Số điện thoại phải chứa 10-15 chữ số"
           />
+          {errors[`adult_${index}_phone`] && (
+            <span className={style.error_message}>
+              {errors[`adult_${index}_phone`]}
+            </span>
+          )}
         </div>
         <div className={style.form_group}>
-          <label className={style.label}>CCCD</label>
+          <label className={style.label}>CCCD*</label>
           <input
             type="text"
-            className={style.input}
+            className={`${style.input} ${errors[`adult_${index}_cccd`] ? style.error : ""}`}
             placeholder="Nhập số CCCD"
             value={passengerData[`adult_${index}`].cccd}
             onChange={(e) =>
               handleInputChange(`adult_${index}`, "cccd", e.target.value)
             }
-            required
-            pattern="\d{12}"
-            title="CCCD phải chứa 12 chữ số"
           />
+          {errors[`adult_${index}_cccd`] && (
+            <span className={style.error_message}>
+              {errors[`adult_${index}_cccd`]}
+            </span>
+          )}
         </div>
       </div>
     </div>
@@ -450,7 +392,7 @@ const Booking = () => {
         className={style.passenger_type}
         onClick={() => toggleSection(`child_${index}`)}
       >
-        Trẻ em {index + 1}
+        Trẻ em {index + 1} (2-12 tuổi)
         <span className={style.toggle_icon}>
           {sections[`child_${index}`] ? "−" : "+"}
         </span>
@@ -462,39 +404,45 @@ const Booking = () => {
           <div className={style.gender}>
             <label className={style.label}>Giới tính*</label>
             <select
-              className={style.input}
+              className={`${style.input} ${errors[`child_${index}_gender`] ? style.error : ""}`}
               value={passengerData[`child_${index}`].gender}
               onChange={(e) =>
                 handleInputChange(`child_${index}`, "gender", e.target.value)
               }
-              required
             >
               <option value="">Chọn giới tính</option>
               <option value="Male">Nam</option>
               <option value="Female">Nữ</option>
             </select>
+            {errors[`child_${index}_gender`] && (
+              <span className={style.error_message}>
+                {errors[`child_${index}_gender`]}
+              </span>
+            )}
           </div>
           <div className={style.full_name}>
             <label className={style.label}>Họ và tên*</label>
             <input
               type="text"
-              className={style.input}
+              className={`${style.input} ${errors[`child_${index}_full_name`] ? style.error : ""}`}
               placeholder="Nhập họ và tên"
               value={passengerData[`child_${index}`].full_name}
               onChange={(e) =>
                 handleInputChange(`child_${index}`, "full_name", e.target.value)
               }
-              required
-              pattern="[A-Za-zÀ-ỹ\s]+"
-              title="Họ và tên chỉ chứa chữ cái và khoảng trắng"
             />
+            {errors[`child_${index}_full_name`] && (
+              <span className={style.error_message}>
+                {errors[`child_${index}_full_name`]}
+              </span>
+            )}
           </div>
         </div>
         <div className={style.form_group}>
           <label className={style.label}>Ngày sinh*</label>
           <input
             type="date"
-            className={style.input}
+            className={`${style.input} ${errors[`child_${index}_date_of_birth`] ? style.error : ""}`}
             min={minChildDate}
             max={maxChildDate}
             value={passengerData[`child_${index}`].date_of_birth}
@@ -505,8 +453,12 @@ const Booking = () => {
                 e.target.value
               )
             }
-            required
           />
+          {errors[`child_${index}_date_of_birth`] && (
+            <span className={style.error_message}>
+              {errors[`child_${index}_date_of_birth`]}
+            </span>
+          )}
         </div>
       </div>
     </div>
@@ -518,7 +470,7 @@ const Booking = () => {
         className={style.passenger_type}
         onClick={() => toggleSection(`infant_${index}`)}
       >
-        Em bé {index + 1}
+        Em bé {index + 1} (0-2 tuổi)
         <span className={style.toggle_icon}>
           {sections[`infant_${index}`] ? "−" : "+"}
         </span>
@@ -530,23 +482,27 @@ const Booking = () => {
           <div className={style.gender}>
             <label className={style.label}>Giới tính*</label>
             <select
-              className={style.input}
+              className={`${style.input} ${errors[`infant_${index}_gender`] ? style.error : ""}`}
               value={passengerData[`infant_${index}`].gender}
               onChange={(e) =>
                 handleInputChange(`infant_${index}`, "gender", e.target.value)
               }
-              required
             >
               <option value="">Chọn giới tính</option>
               <option value="Male">Nam</option>
               <option value="Female">Nữ</option>
             </select>
+            {errors[`infant_${index}_gender`] && (
+              <span className={style.error_message}>
+                {errors[`infant_${index}_gender`]}
+              </span>
+            )}
           </div>
           <div className={style.full_name}>
             <label className={style.label}>Họ và tên*</label>
             <input
               type="text"
-              className={style.input}
+              className={`${style.input} ${errors[`infant_${index}_full_name`] ? style.error : ""}`}
               placeholder="Nhập họ và tên"
               value={passengerData[`infant_${index}`].full_name}
               onChange={(e) =>
@@ -556,17 +512,19 @@ const Booking = () => {
                   e.target.value
                 )
               }
-              required
-              pattern="[A-Za-zÀ-ỹ\s]+"
-              title="Họ và tên chỉ chứa chữ cái và khoảng trắng"
             />
+            {errors[`infant_${index}_full_name`] && (
+              <span className={style.error_message}>
+                {errors[`infant_${index}_full_name`]}
+              </span>
+            )}
           </div>
         </div>
         <div className={style.form_group}>
           <label className={style.label}>Ngày sinh*</label>
           <input
             type="date"
-            className={style.input}
+            className={`${style.input} ${errors[`infant_${index}_date_of_birth`] ? style.error : ""}`}
             min={minInfantDate}
             max={maxInfantDate}
             value={passengerData[`infant_${index}`].date_of_birth}
@@ -577,8 +535,12 @@ const Booking = () => {
                 e.target.value
               )
             }
-            required
           />
+          {errors[`infant_${index}_date_of_birth`] && (
+            <span className={style.error_message}>
+              {errors[`infant_${index}_date_of_birth`]}
+            </span>
+          )}
         </div>
       </div>
     </div>
@@ -603,8 +565,10 @@ const Booking = () => {
           <div className={style.stepTitle}>Thanh toán</div>
           <div className={style.stepDesc}>Thanh toán để nhận vé máy bay</div>
         </div>
-        <div className={style.line}></div>
       </div>
+      {errors.global && (
+        <div className={style.global_error}>{errors.global}</div>
+      )}
       <div className={style.block_main}>
         <div className={style.booking_information}>
           {Array.from({ length: passengers.adults }, (_, i) =>
@@ -658,12 +622,14 @@ const Booking = () => {
                   )}
                 </div>
                 <div className={style.totalAmount}>
-                  <p>
+                  <div className={style.totalAmount_price}>
                     <strong>
                       Tổng tiền: {totalPrice?.toLocaleString()} VND
                     </strong>
+                  </div>
+                  <div className={style.totalAmount_button}>
                     <button onClick={handleBooking}>Thanh toán</button>
-                  </p>
+                  </div>
                 </div>
               </div>
             </div>

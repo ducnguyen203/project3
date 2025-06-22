@@ -144,7 +144,7 @@ const Flight = () => {
       } finally {
         setIsLoading(false);
       }
-    }, 800), // Tăng debounce từ 500ms lên 800ms
+    }, 800),
     [departure, destination, departureDate, returnDate, tripType, passengers]
   );
 
@@ -316,7 +316,6 @@ const Flight = () => {
     };
   }, []);
 
-  // Logic phân trang cho chuyến đi
   const indexOfLastDepartureFlight = currentDeparturePage * flightsPerPage;
   const indexOfFirstDepartureFlight =
     indexOfLastDepartureFlight - flightsPerPage;
@@ -328,7 +327,6 @@ const Flight = () => {
     (flightResults?.departureFlights?.length || 0) / flightsPerPage
   );
 
-  // Logic phân trang cho chuyến về
   const indexOfLastReturnFlight = currentReturnPage * flightsPerPage;
   const indexOfFirstReturnFlight = indexOfLastReturnFlight - flightsPerPage;
   const currentReturnFlights = flightResults?.returnFlights?.slice(
@@ -342,7 +340,6 @@ const Flight = () => {
   const paginateDeparture = (pageNumber) => setCurrentDeparturePage(pageNumber);
   const paginateReturn = (pageNumber) => setCurrentReturnPage(pageNumber);
 
-  // Hàm tạo danh sách nút phân trang
   const getPaginationButtons = (currentPage, totalPages, paginate) => {
     const maxButtons = 5;
     const buttons = [];
@@ -436,7 +433,6 @@ const Flight = () => {
     return buttons;
   };
 
-  // Component SVG cho thông báo không có chuyến bay
   const NoFlightSVG = () => (
     <svg
       width="400"
@@ -473,14 +469,12 @@ const Flight = () => {
     </svg>
   );
 
-  // Component Spinner
   const Spinner = () => (
     <div className={style.spinner}>
       <div className={style.spinnerInner}></div>
     </div>
   );
 
-  // Component Skeleton Loading - Cập nhật để hiển thị 5 thẻ giả lập
   const SkeletonLoading = () => (
     <div className={style.skeletonContainer}>
       <div className={style.skeletonCalendar}></div>
@@ -936,12 +930,14 @@ const Flight = () => {
                 )}
               </div>
               <div className={style.totalAmount}>
-                <p>
+                <div className={style.totalAmount_price}>
                   <strong>
                     Tổng tiền: {calculateTotalPrice().toLocaleString()} VND
                   </strong>
+                </div>
+                <div className={style.totalAmount_button}>
                   <button onClick={handleContinue}>Đi tiếp</button>
-                </p>
+                </div>
               </div>
             </div>
           </div>

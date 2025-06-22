@@ -6,21 +6,21 @@ html {
 /* Ensure body takes full viewport height */
 body {
   min-height: 100vh;
-  font-family: OpenSans-Regular;
+  font-family: "OpenSans-Regular", sans-serif;
 }
 
 .text_center {
   text-align: center;
   margin-bottom: 30px;
-  font-family: OpenSans-Regular;
+  font-family: "OpenSans-Regular", sans-serif;
 }
 
 .block_main {
-  max-width: 1250px; /* Changed from fixed width to max-width for responsiveness */
+  max-width: 1250px;
   width: 100%;
   margin: 90px auto 0;
   display: flex;
-  padding: 0 20px; /* Add padding for smaller screens */
+  padding: 0 20px;
   box-sizing: border-box;
 }
 
@@ -78,13 +78,15 @@ body {
 .form_group {
   margin-bottom: 15px;
   display: flex;
-  flex-wrap: wrap; /* Allow wrapping for responsiveness */
-  gap: 10px; /* Add spacing between form elements */
+  flex-wrap: wrap;
+  gap: 10px;
+  position: relative;
+  margin-top: 24px;
 }
 
 .form_group div {
   flex: 1;
-  min-width: 150px; /* Ensure minimum width for smaller screens */
+  min-width: 150px;
 }
 
 .gender {
@@ -92,7 +94,7 @@ body {
 }
 
 .full_name {
-  max-width: 390px; /* Changed from fixed width to max-width */
+  max-width: 390px;
   flex: 1;
   position: relative;
 }
@@ -100,22 +102,50 @@ body {
 .label {
   display: block;
   font-size: 14px;
-  /* color: #666; */
   margin-bottom: 5px;
+  position: absolute;
+  top: -10px;
+  left: 26px;
+  background: white;
+  padding: 0 5px;
+  transition: 0.2s;
+  font-weight: 500;
+  z-index: 1;
 }
 
 .input {
   width: 100%;
-  padding: 10px;
+  padding: 16px 20px;
   border: 1px solid #ccc;
-  border-radius: 5px;
+  border-radius: 28px;
   font-size: 14px;
   box-sizing: border-box;
+  height: 50px;
+  padding-left: 50px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .input:focus {
   outline: none;
   border-color: #00bcd4;
+}
+
+.input.error {
+  border-color: #ff0000;
+}
+
+.error_message {
+  color: #ff0000;
+  font-size: 12px;
+  margin-top: 5px;
+  display: block;
+}
+
+.global_error {
+  color: #ff0000;
+  font-size: 14px;
+  text-align: center;
+  margin-bottom: 20px;
 }
 
 .flight_info {
@@ -139,17 +169,17 @@ body {
   height: auto;
 }
 
-/* Sidebar Styles (Adapted from Flight.module.css) */
 .FlightSidebar_filter {
   width: 30%;
-  max-width: 400px;
-  border: 1px solid var(--gray-200, #eaecf0);
-  background: var(--base-white, #fff);
+  max-width: 325px;
+  border: 1px solid #eaecf0;
+  background: #fff;
   border-radius: 20px;
-  margin-left: 10px;
+  margin-left: 20px;
   margin-bottom: 30px;
-  max-height: 325px;
   height: auto;
+  padding: 10px;
+  max-height: 300px;
 }
 
 .bookingInfo > div {
@@ -174,23 +204,36 @@ body {
   font-size: 14px;
 }
 
-.totalAmount p {
-  margin: 5px 0;
-  font-size: 14px;
-  color: #333;
+.totalAmount {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.totalAmount strong {
+.totalAmount_price {
+  flex: 1;
+  margin: 0;
+  font-size: 14px;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.totalAmount_price strong {
   font-size: 16px;
   color: #004d40;
 }
 
-.totalAmount button {
+.totalAmount_button {
+  flex: 0 0 90px;
+}
+
+.totalAmount_button button {
   width: 90px;
-  height: 35px;
+  height: 40px;
   border-radius: 20px;
-  border: 1px solid gainsboro;
-  margin-left: 40px;
+  border: 1px solid #dcdcdc;
   background-color: #007bff;
   color: white;
   font-size: 14px;
@@ -198,11 +241,10 @@ body {
   transition: background-color 0.3s ease;
 }
 
-.totalAmount button:hover {
-  background: #ff9900;
+.totalAmount_button button:hover {
+  background-color: #ff9900;
 }
 
-/* Stepper Styles (Adapted from Flight.module.css) */
 .stepper {
   display: flex;
   justify-content: space-between;
@@ -235,8 +277,8 @@ body {
 }
 
 .active.circle {
-  background-color: #00bcd4 !important;
-  box-shadow: 0 0 0 5px #b2ebf2 !important;
+  background-color: #00bcd4;
+  box-shadow: 0 0 0 5px #b2ebf2;
 }
 
 .stepTitle {
@@ -256,10 +298,9 @@ body {
 
 .active.stepTitle,
 .active.stepDesc {
-  color: #00bcd4 !important;
+  color: #00bcd4;
 }
 
-/* Gray line for the entire stepper */
 .stepper::before {
   content: "";
   position: absolute;
@@ -271,71 +312,38 @@ body {
   z-index: 1;
 }
 
-/* Blue progress line up to the active step (Đặt chỗ is second step) */
 .stepper::after {
   content: "";
   position: absolute;
   top: 7px;
   left: 20px;
-  width: calc(66.66% - 10px); /* Progress for second step */
+  width: calc(66.66% - 10px);
   height: 2px;
   background-color: #00bcd4;
   z-index: 1;
 }
 
-.label {
-  position: absolute;
-  top: -10px;
-  left: 26px;
-  background: white;
-  padding: 0 5px;
-  transition: 0.2s;
-  font-size: 14px;
-  line-height: 20px;
-  font-weight: 500;
-  z-index: 1;
-}
-.form_group {
-  position: relative;
-  margin-top: 24px;
-}
-
-.form_group input {
-  position: relative;
-  padding: 16px 20px;
-  border-radius: 28px;
-  border: 1px solid gainsboro;
-  box-shadow: var(--shadow-xs);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  fill: var(--base-white);
-  height: 50px;
-  margin-bottom: 20px;
-  padding-left: 50px;
-}
 .form_group select {
   position: relative;
   padding: 16px 20px;
   border-radius: 28px;
-  border: 1px solid gainsboro;
-  box-shadow: var(--shadow-xs);
+  border: 1px solid #dcdcdc;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   display: flex;
   align-items: center;
   gap: 8px;
-  fill: var(--base-white);
-
   height: 50px;
   margin-bottom: 20px;
   padding-left: 50px;
-
-  /* Ẩn mũi tên dropdown mặc định */
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
-  /* Biểu tượng mũi tên tùy chỉnh */
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
   background-repeat: no-repeat;
-  background-position: right 10px center; /* Di chuyển mũi tên sang trái */
+  background-position: right 10px center;
   background-size: 12px;
+}
+
+.form_group select.error {
+  border-color: #ff0000;
 }
