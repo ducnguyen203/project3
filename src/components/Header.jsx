@@ -48,7 +48,7 @@ const Header = () => {
             <a href="/Flight">Flights</a>
           </li>
           <li className={styles.navItem}>
-            <a href="/Booking"> My Bookings</a>
+            <a href="/MyBooking"> My Bookings</a>
           </li>
           <li className={styles.navItem}>
             <a href="#">Abouts us</a>

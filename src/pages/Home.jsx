@@ -17,11 +17,7 @@ const Home = () => {
   const [destination, setDestination] = useState("");
   const [departureDate, setDepartureDate] = useState(new Date());
   const [returnDate, setReturnDate] = useState(null);
-  // const [passengers, setPassengers] = useState({
-  //   adults: 1,
-  //   children: 0,
-  //   infants: 0,
-  // });
+
   const [passengers, setPassengers] = useState(() => {
     const storedPassengers = localStorage.getItem("passengers");
     return storedPassengers

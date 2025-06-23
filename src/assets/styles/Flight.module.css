@@ -275,6 +275,10 @@ body {
     filter 0.3s ease,
     opacity 0.3s ease;
 }
+.errorInput {
+  border: 2px solid red !important;
+}
+
 .content_Flight {
   display: flex;
   border: 1px solid var(--gray-200, #eaecf0);
@@ -290,7 +294,7 @@ body {
   border-radius: 20px;
   margin-left: 10px;
   margin-bottom: 30px;
-  max-height: 325px;
+  max-height: 423px;
   height: auto;
 }
 .flightDetails {

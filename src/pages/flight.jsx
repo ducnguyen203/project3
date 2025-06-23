@@ -44,59 +44,57 @@ const Flight = () => {
   const [selectedReturnTicket, setSelectedReturnTicket] = useState(null);
   const [currentDeparturePage, setCurrentDeparturePage] = useState(1);
   const [currentReturnPage, setCurrentReturnPage] = useState(1);
+  const [errors, setErrors] = useState({
+    departure: false,
+    destination: false,
+    departureDate: false,
+    returnDate: false,
+  });
+
   const flightsPerPage = 5;
   const isFlightPage = true;
   const navigate = useNavigate();
 
   const calculateTotalPrice = () => {
-    const totalPassengers =
-      passengers.adults + passengers.children + passengers.infants;
     let total = 0;
     if (selectedDepartureTicket) {
-      total += selectedDepartureTicket.price * totalPassengers;
+      total +=
+        selectedDepartureTicket.price *
+          (passengers.adults + passengers.children) +
+        passengers.infants * 100000;
     }
     if (tripType === "round-trip" && selectedReturnTicket) {
-      total += selectedReturnTicket.price * totalPassengers;
+      total +=
+        selectedReturnTicket.price * (passengers.adults + passengers.children) +
+        passengers.infants * 100000;
     }
     return total;
   };
 
-  useEffect(() => {
-    const storedParams = localStorage.getItem("flightSearchParams");
-    if (storedParams) {
-      const parsedParams = JSON.parse(storedParams);
-      if (
-        parsedParams.departure &&
-        parsedParams.destination &&
-        parsedParams.departureDate
-      ) {
-        setTripType(parsedParams.tripType);
-        setDeparture(parsedParams.departure);
-        setDestination(parsedParams.destination);
-        setDepartureDate(new Date(parsedParams.departureDate));
-        setReturnDate(
-          parsedParams.returnDate ? new Date(parsedParams.returnDate) : null
-        );
-        setPassengers(parsedParams.passengers);
-        setShouldAutoSearch(true);
-      } else {
-        alert("Vui lòng nhập đầy đủ thông tin.");
-      }
-    } else {
-      alert("Không có thông tin tìm kiếm.");
-    }
-  }, []);
-
   const handleSearchFlights = useCallback(
     debounce(async () => {
-      if (!departure || !destination || !departureDate) {
-        alert("Vui lòng nhập đầy đủ thông tin điểm đi, điểm đến và ngày đi.");
+      if (
+        !departure ||
+        !destination ||
+        !departureDate ||
+        (tripType === "round-trip" && !returnDate)
+      ) {
+        setErrors({
+          departure: !departure,
+          destination: !destination,
+          departureDate: !departureDate,
+          returnDate: tripType === "round-trip" && !returnDate,
+        });
         return;
       }
-      if (tripType === "round-trip" && !returnDate) {
-        alert("Vui lòng nhập ngày về.");
-        return;
-      }
+
+      // ✅ Reset lỗi nếu hợp lệ
+      setErrors({
+        departure: false,
+        destination: false,
+        departureDate: false,
+        returnDate: false,
+      });
 
       setIsLoading(true);
       localStorage.setItem(
@@ -144,7 +142,7 @@ const Flight = () => {
       } finally {
         setIsLoading(false);
       }
-    }, 800),
+    }, 100),
     [departure, destination, departureDate, returnDate, tripType, passengers]
   );
 
@@ -201,7 +199,9 @@ const Flight = () => {
 
   const handleDepartureChange = (e) => {
     const value = e.target.value;
-    setDeparture(value);
+    if (errors.departure && value) {
+      setErrors((prev) => ({ ...prev, departure: false }));
+    }
     const normalizedValue = normalizeString(value);
     setFilteredAirports(
       airports
@@ -235,6 +235,9 @@ const Flight = () => {
   const handleDestinationChange = (e) => {
     const value = e.target.value;
     setDestination(value);
+    if (errors.destination && value) {
+      setErrors((prev) => ({ ...prev, destination: false }));
+    }
     const normalizedValue = normalizeString(value);
     setFilteredAirports(
       airports
@@ -288,6 +291,9 @@ const Flight = () => {
   const handleDepartureDateChange = useCallback(
     (newDate) => {
       setDepartureDate(newDate);
+      if (errors.departureDate && newDate) {
+        setErrors((prev) => ({ ...prev, departureDate: false }));
+      }
       if (departure && destination && (tripType === "one-way" || returnDate)) {
         setShouldAutoSearch(true);
       }
@@ -298,6 +304,9 @@ const Flight = () => {
   const handleReturnDateChange = useCallback(
     (newDate) => {
       setReturnDate(newDate);
+      if (errors.returnDate && newDate) {
+        setErrors((prev) => ({ ...prev, returnDate: false }));
+      }
       if (departure && destination && departureDate) {
         setShouldAutoSearch(true);
       }
@@ -614,6 +623,7 @@ const Flight = () => {
                 onFocus={handleDepartureFocus}
                 onChange={handleDepartureChange}
                 ref={inputRefDeparture}
+                className={errors.departure ? style.errorInput : ""}
               />
               <label className={style.sm}>Điểm đi</label>
               {activeInput === "departure" && filteredAirports.length > 0 && (
@@ -642,6 +652,7 @@ const Flight = () => {
                 onFocus={handleDestinationFocus}
                 onChange={handleDestinationChange}
                 ref={inputRefDestination}
+                className={errors.destination ? style.errorInput : ""}
               />
               <label className={style.sm}>Điểm đến</label>
               {activeInput === "destination" && filteredAirports.length > 0 && (
@@ -671,6 +682,7 @@ const Flight = () => {
                 placeholderText="Chọn ngày đi"
                 minDate={new Date()}
                 dateFormat="dd/MM/yyyy"
+                className={errors.departureDate ? style.errorInput : ""}
               />
               <label className={style.sm}>Ngày đi</label>
             </div>
@@ -683,6 +695,7 @@ const Flight = () => {
                   placeholderText="Chọn ngày về"
                   minDate={departureDate || new Date()}
                   dateFormat="dd/MM/yyyy"
+                  className={errors.returnDate ? style.errorInput : ""}
                 />
                 <label className={style.sm}>Ngày về</label>
               </div>
@@ -899,36 +912,44 @@ const Flight = () => {
                   </p>
                 )}
               </div>
+
               <div className={style.ticketInfo}>
                 <p>
-                  Tổng vé:{" "}
-                  {passengers.adults + passengers.children + passengers.infants}
+                  <strong>Tóm tắt vé</strong>
                 </p>
+                {passengers.adults > 0 && (
+                  <p>{passengers.adults} x Người lớn</p>
+                )}
+                {passengers.children > 0 && (
+                  <p>{passengers.children} x Trẻ em</p>
+                )}
+                {passengers.infants > 0 && <p>{passengers.infants} x Em bé</p>}
+
                 {selectedDepartureTicket && (
                   <p>
                     Chiều đi:{" "}
                     {(
                       selectedDepartureTicket.price *
-                      (passengers.adults +
-                        passengers.children +
-                        passengers.infants)
-                    ).toLocaleString()}{" "}
+                        (passengers.adults + passengers.children) +
+                      passengers.infants * 100000
+                    ).toLocaleString("vi-VN")}{" "}
                     VND
                   </p>
                 )}
+
                 {tripType === "round-trip" && selectedReturnTicket && (
                   <p>
                     Chiều về:{" "}
                     {(
                       selectedReturnTicket.price *
-                      (passengers.adults +
-                        passengers.children +
-                        passengers.infants)
-                    ).toLocaleString()}{" "}
+                        (passengers.adults + passengers.children) +
+                      passengers.infants * 100000
+                    ).toLocaleString("vi-VN")}{" "}
                     VND
                   </p>
                 )}
               </div>
+
               <div className={style.totalAmount}>
                 <div className={style.totalAmount_price}>
                   <strong>
