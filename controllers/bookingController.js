@@ -134,6 +134,15 @@ class BookingController {
       });
     }
   }
+  static async timKiemDatVeTheoMa(req, res) {
+    try {
+      const result = await BookingModel.timKiemDatVeTheoMa(req, res);
+      return result;
+    } catch (error) {
+      console.error("Lỗi Controller:", error);
+      return res.status(500).json({ message: "Lỗi khi tìm kiếm đặt vé" });
+    }
+  }
 }
 
 module.exports = BookingController;
