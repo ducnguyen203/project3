@@ -41,26 +41,27 @@ const Login = () => {
       return;
     }
     if (!validateEmail(email)) {
-      setError("Email Không hợp lệ!");
+      setError("Email không hợp lệ!");
       return;
     }
 
     try {
-      const reponse = await fetch("http://localhost:5000/api/auth/login", {
+      const response = await fetch("http://localhost:5000/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
         credentials: "include",
       });
-      const data = await reponse.json();
+      const data = await response.json();
 
-      if (!reponse.ok) {
+      if (!response.ok) {
         setError(data.message || "Email hoặc mật khẩu không đúng!");
         return;
       }
+
       localStorage.setItem("Token", data.accessToken);
 
-      // Nếu "Ghi nhớ đăng nhập" → Lưu email vào LocalStorage
+      // ⚙️ Nếu chọn "Ghi nhớ đăng nhập"
       if (rememberMe) {
         localStorage.setItem("email", email);
         localStorage.setItem("password", btoa(password));
@@ -70,9 +71,21 @@ const Login = () => {
         localStorage.removeItem("password");
         localStorage.removeItem("rememberMe");
       }
+
       setMessage("Đăng nhập thành công!");
+
+      // ⚠️ KIỂM TRA có pendingBooking không → Điều hướng quay lại đặt vé nếu có
+      const pendingBooking = localStorage.getItem("pendingBooking");
+
       setTimeout(() => {
-        navigate("/");
+        if (pendingBooking) {
+          localStorage.removeItem("pendingBooking");
+          navigate("/passenger-service", {
+            state: JSON.parse(pendingBooking),
+          });
+        } else {
+          navigate("/");
+        }
       }, 1000);
     } catch (error) {
       console.log("Lỗi fetch:", error);

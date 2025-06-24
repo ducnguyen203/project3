@@ -6,7 +6,6 @@ const PassengerService = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
 
-
   if (!state || !state.selectedDepartureTicket || !state.passengerData) {
     return (
       <div className={styles.error}>
@@ -28,7 +27,6 @@ const PassengerService = () => {
     totalPrice,
     passengerData,
   } = state;
-
 
   const today = new Date();
   const departureDate = new Date(selectedDepartureTicket?.departure_date);
@@ -89,7 +87,6 @@ const PassengerService = () => {
     setPassengerTicketTypes(types);
     console.log("Passenger Ticket Types:", JSON.stringify(types, null, 2));
   }, [passengerData]);
-
 
   useEffect(() => {
     const fetchSeatMap = async (scheduleId, flightDirection) => {
@@ -200,17 +197,33 @@ const PassengerService = () => {
   };
 
   const handleProceedToPayment = async () => {
-    const totalPassengers = passengers.adults + passengers.children;
+    // Calculate total passengers (for validation)
+    const totalPassengers =
+      passengers.adults + passengers.children + passengers.infants;
+    // Calculate number of passengers requiring seats (for numPassengers)
+    const totalSeatPassengers = passengers.adults + passengers.children;
     const requiredSeats =
-      tripType === "round-trip" ? totalPassengers * 2 : totalPassengers;
+      tripType === "round-trip" ? totalSeatPassengers * 2 : totalSeatPassengers;
+
+    // Validate seat selections
     const assignedSeats = Object.values(seatSelections).reduce(
       (count, selection) => count + Object.keys(selection || {}).length,
       0
     );
-
     if (assignedSeats < requiredSeats) {
       alert(
-        "Vui lòng chọn chỗ ngồi cho tất cả hành khách trước khi thanh toán."
+        "Vui lòng chọn chỗ ngồi cho tất cả hành khách (người lớn và trẻ em) trước khi thanh toán."
+      );
+      return;
+    }
+
+    // Validate passengerData
+    if (
+      !passengerData ||
+      Object.keys(passengerData).length !== totalPassengers
+    ) {
+      setError(
+        `Dữ liệu hành khách không hợp lệ: Thiếu ${totalPassengers - Object.keys(passengerData).length} hành khách`
       );
       return;
     }
@@ -218,26 +231,31 @@ const PassengerService = () => {
     try {
       setLoading(true);
 
+      // Log payload for debugging
+      const bookingPayload = {
+        userId: 1,
+        departureScheduleId: selectedDepartureTicket.schedule_id,
+        returnScheduleId: selectedReturnTicket?.schedule_id || null,
+        numPassengers: totalSeatPassengers, // Use adults + children only
+        totalPrice,
+        passengers: Object.values(passengerData),
+        tripType,
+      };
+      console.log("Booking Payload:", JSON.stringify(bookingPayload, null, 2));
+
       const bookingResponse = await fetch(
         "http://localhost:5000/api/bookings",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            userId: 1, // Thay bằng userId thực tế nếu có đăng nhập
-            departureScheduleId: selectedDepartureTicket.schedule_id,
-            returnScheduleId: selectedReturnTicket?.schedule_id || null,
-            numPassengers: requiredSeats,
-            totalPrice,
-            passengers: Object.values(passengerData),
-            tripType,
-          }),
+          body: JSON.stringify(bookingPayload),
         }
       );
 
       if (!bookingResponse.ok) {
         const errorData = await bookingResponse.json();
-        throw new Error(errorData.message || "Lỗi khi tạo booking");
+        setError(errorData.message || "Lỗi khi tạo booking");
+        return;
       }
 
       const bookingData = await bookingResponse.json();
@@ -265,7 +283,7 @@ const PassengerService = () => {
       });
     } catch (err) {
       console.error("Lỗi khi tạo booking:", err);
-      setError(err.message);
+      setError(err.message || "Lỗi không xác định khi tạo booking");
     } finally {
       setLoading(false);
     }
@@ -277,6 +295,9 @@ const PassengerService = () => {
         : selectedReturnTicket.schedule_id;
 
     for (const [passengerId, selections] of Object.entries(seatSelections)) {
+      // Bỏ qua em bé
+      if (passengerId.startsWith("infant")) continue;
+
       const seatNumber = selections[flightDirection];
       if (!seatNumber) continue;
       const fullName = passengerData[passengerId]?.full_name || "Unknown";
@@ -331,7 +352,6 @@ const PassengerService = () => {
       seatMap
     );
 
-  
     const isSeatSelected = !!seatSelections[passengerId]?.[currentFlight];
 
     return (
@@ -513,19 +533,36 @@ const PassengerService = () => {
                 </div>
                 <div className={styles.ticketInfo}>
                   <p>
-                    Tổng vé:{" "}
-                    {(passengers.adults +
-                      passengers.children +
-                      passengers.infants) *
-                      (tripType === "round-trip" ? 2 : 1)}
+                    <strong>Tóm tắt vé</strong>
                   </p>
-                  <p>
-                    Chiều đi: {selectedDepartureTicket.price.toLocaleString()}{" "}
-                    VND
-                  </p>
+                  {passengers.adults > 0 && (
+                    <p>{passengers.adults} x Người lớn</p>
+                  )}
+                  {passengers.children > 0 && (
+                    <p>{passengers.children} x Trẻ em</p>
+                  )}
+                  {passengers.infants > 0 && (
+                    <p>{passengers.infants} x Em bé</p>
+                  )}
+                  {selectedDepartureTicket && (
+                    <p>
+                      Chiều đi:{" "}
+                      {(
+                        selectedDepartureTicket.price *
+                          (passengers.adults + passengers.children) +
+                        passengers.infants * 100000
+                      ).toLocaleString("vi-VN")}{" "}
+                      VND
+                    </p>
+                  )}
                   {tripType === "round-trip" && selectedReturnTicket && (
                     <p>
-                      Chiều về: {selectedReturnTicket.price.toLocaleString()}{" "}
+                      Chiều về:{" "}
+                      {(
+                        selectedReturnTicket.price *
+                          (passengers.adults + passengers.children) +
+                        passengers.infants * 100000
+                      ).toLocaleString("vi-VN")}{" "}
                       VND
                     </p>
                   )}

@@ -68,9 +68,9 @@ const CustomerInfo = ({ tickets }) => {
 
           return (
             <div key={index} className={styles.summary}>
-              <h4>
+              <h3>
                 {passengerType}: {name}
-              </h4>
+              </h3>
               <div
                 style={{
                   display: "grid",
@@ -84,9 +84,16 @@ const CustomerInfo = ({ tickets }) => {
                   return (
                     <div key={idx}>
                       <b>{direction}</b> <br />
-                      Hành lý ký gửi: {ticket.baggage_allowance} <br />
-                      Chỗ ngồi: {ticket.seat_number || "Chưa gán"} <br />
-                      Special change: {ticket.special_change || "None"}
+                      <div className={styles.mg}>
+                        Chỗ ngồi:{" "}
+                        {ticket.passenger_type === "Infant"
+                          ? "Ngồi cùng người lớn"
+                          : ticket.seat_number || "Chưa gán"}
+                      </div>
+                      <div className={styles.mg}>
+                        {" "}
+                        Hành lý ký gửi: {ticket.baggage_allowance}
+                      </div>
                     </div>
                   );
                 })}

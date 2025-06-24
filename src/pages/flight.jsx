@@ -70,6 +70,31 @@ const Flight = () => {
     }
     return total;
   };
+  useEffect(() => {
+    const storedParams = localStorage.getItem("flightSearchParams");
+    if (storedParams) {
+      const parsedParams = JSON.parse(storedParams);
+      if (
+        parsedParams.departure &&
+        parsedParams.destination &&
+        parsedParams.departureDate
+      ) {
+        setTripType(parsedParams.tripType);
+        setDeparture(parsedParams.departure);
+        setDestination(parsedParams.destination);
+        setDepartureDate(new Date(parsedParams.departureDate));
+        setReturnDate(
+          parsedParams.returnDate ? new Date(parsedParams.returnDate) : null
+        );
+        setPassengers(parsedParams.passengers);
+        setShouldAutoSearch(true); // <-- cho phép tự tìm sau khi gán state
+      } else {
+        alert("Vui lòng nhập đầy đủ thông tin.");
+      }
+    } else {
+      alert("Không có thông tin tìm kiếm.");
+    }
+  }, []);
 
   const handleSearchFlights = useCallback(
     debounce(async () => {

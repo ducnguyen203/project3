@@ -108,6 +108,16 @@ const Booking = () => {
   )
     .toISOString()
     .split("T")[0];
+  const calculateAge = (dateOfBirth) => {
+    const dob = new Date(dateOfBirth);
+    const today = new Date();
+    let age = today.getFullYear() - dob.getFullYear();
+    const monthDiff = today.getMonth() - dob.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+      age--;
+    }
+    return age;
+  };
 
   const validateForm = () => {
     const newErrors = {};
@@ -115,6 +125,7 @@ const Booking = () => {
     const passengersArray = Object.entries(passengerData);
 
     for (const [section, passenger] of passengersArray) {
+      // ⚠️ Kiểm tra họ tên
       if (!passenger.full_name.trim()) {
         newErrors[`${section}_full_name`] = "Họ và tên không được để trống";
         isValid = false;
@@ -124,16 +135,38 @@ const Booking = () => {
         isValid = false;
       }
 
+      // ⚠️ Kiểm tra giới tính
       if (!passenger.gender) {
         newErrors[`${section}_gender`] = "Vui lòng chọn giới tính";
         isValid = false;
       }
 
+      // ⚠️ Kiểm tra ngày sinh
       if (!passenger.date_of_birth) {
         newErrors[`${section}_date_of_birth`] = "Ngày sinh không được để trống";
         isValid = false;
+      } else {
+        const age = calculateAge(passenger.date_of_birth);
+
+        if (passenger.passenger_type === "Adult" && (age < 12 || age > 120)) {
+          newErrors[`${section}_date_of_birth`] =
+            "Người lớn phải từ 12 tuổi trở lên";
+          isValid = false;
+        }
+
+        if (passenger.passenger_type === "Child" && (age < 2 || age >= 12)) {
+          newErrors[`${section}_date_of_birth`] =
+            "Trẻ em phải từ 2 đến dưới 12 tuổi";
+          isValid = false;
+        }
+
+        if (passenger.passenger_type === "Infant" && (age < 0 || age >= 2)) {
+          newErrors[`${section}_date_of_birth`] = "Em bé phải dưới 2 tuổi";
+          isValid = false;
+        }
       }
 
+      // ⚠️ Kiểm tra email cho người lớn
       if (passenger.passenger_type === "Adult") {
         if (!passenger.email.trim()) {
           newErrors[`${section}_email`] = "Email không được để trống";
@@ -143,6 +176,7 @@ const Booking = () => {
           isValid = false;
         }
 
+        // ⚠️ Kiểm tra số điện thoại
         if (!passenger.phone.trim()) {
           newErrors[`${section}_phone`] = "Số điện thoại không được để trống";
           isValid = false;
@@ -152,6 +186,7 @@ const Booking = () => {
           isValid = false;
         }
 
+        // ⚠️ Kiểm tra CCCD
         if (!passenger.cccd.trim()) {
           newErrors[`${section}_cccd`] = "CCCD không được để trống";
           isValid = false;
@@ -161,6 +196,7 @@ const Booking = () => {
         }
       }
 
+      // ⚠️ Kiểm tra Price ID
       if (
         !passenger.price_id_departure ||
         (tripType === "round-trip" && !passenger.price_id_return)
@@ -170,6 +206,7 @@ const Booking = () => {
       }
     }
 
+    // ⚠️ Kiểm tra có ít nhất 1 người lớn nếu có trẻ em hoặc em bé
     const hasChildrenOrInfants = passengersArray.some(
       ([_, p]) => p.passenger_type === "Child" || p.passenger_type === "Infant"
     );
