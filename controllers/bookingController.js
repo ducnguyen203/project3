@@ -26,15 +26,6 @@ class BookingController {
         return res.status(400).json({ message: "Thiếu các trường bắt buộc" });
       }
 
-      // Kiểm tra số lượng hành khách
-      const expectedPassengers =
-        tripType === "round-trip" ? passengers.length * 2 : passengers.length;
-      if (expectedPassengers !== numPassengers) {
-        return res
-          .status(400)
-          .json({ message: "Số lượng hành khách không khớp" });
-      }
-
       // Kiểm tra có ít nhất một người lớn nếu có trẻ em hoặc em bé
       const hasChildrenOrInfants = passengers.some(
         (p) => p.passenger_type === "Child" || p.passenger_type === "Infant"
@@ -102,7 +93,7 @@ class BookingController {
         extendedPassengers = passengers.map((p) => ({
           ...p,
           flight_direction: "departure",
-          price_id: p.price_id_departure, // ✅ Cần dòng này để set `price_id`
+          price_id: p.price_id_departure,
         }));
       }
 
@@ -130,7 +121,7 @@ class BookingController {
     } catch (error) {
       console.error("Lỗi khi tạo đặt vé:", error);
       return res.status(400).json({
-        message: error.message || "Lỗi khi tạo đặt vé",
+        message: error.message || "Lỗi khi tạo đặt vé server",
       });
     }
   }

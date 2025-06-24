@@ -79,7 +79,7 @@ const login = async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 ngày
     });
 
-    res.json({ accessToken, role: user[0].role });
+    res.json({ accessToken, role: user[0].role, userId: user[0].id });
   } catch (error) {
     console.error("🔥 Lỗi Server:", error);
     res.status(500).json({ message: "Lỗi server", error: error.message });

@@ -8,11 +8,11 @@ const verifyToken = (req, res, next) => {
   }
 
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-    if (err) return res.status(401).json({ message: "Token không hợp lệ!" });
+    if (err) return res.status(401).json({ message: "Token không hợp lệ!" }); 
 
     req.user = user; // Lưu user vào request
     next();
-  });
+  }); 
 };
 
 // Middleware kiểm tra quyền Admin

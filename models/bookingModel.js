@@ -233,11 +233,13 @@ class BookingModel {
                 a3.airport_code as return_departure_airport_code,
                 a4.airport_name as return_arrival_airport,
                 a4.airport_code as return_arrival_airport_code,
-
+                s.seat_number AS seat_number,
                 s1.departure_date as departure_date,
                 s1.departure_time as departure_time,
+                s1.arrival_time as arrival_time,
                 s2.departure_date as return_date,
-                s2.departure_time as return_time
+                s2.departure_time as return_time,
+                s2.arrival_time as return_arrival_time
          FROM bookings b
          LEFT JOIN tickets t ON b.booking_id = t.booking_id
          LEFT JOIN schedules s1 ON b.departure_schedule_id = s1.schedule_id
@@ -248,6 +250,7 @@ class BookingModel {
          LEFT JOIN airports a2 ON f1.arrival_airport_id = a2.airport_id
          LEFT JOIN airports a3 ON f2.departure_airport_id = a3.airport_id
          LEFT JOIN airports a4 ON f2.arrival_airport_id = a4.airport_id
+         LEFT JOIN seats s ON t.seat_id = s.seat_id
          WHERE b.booking_code = ?`,
         [bookingCode]
       );
@@ -277,6 +280,7 @@ class BookingModel {
           },
           departure_date: bookings[0].departure_date,
           departure_time: bookings[0].departure_time,
+          arrival_time: bookings[0].arrival_time,
         },
 
         return_flight: bookings[0].return_schedule_id
@@ -292,6 +296,7 @@ class BookingModel {
               },
               departure_date: bookings[0].return_date,
               departure_time: bookings[0].return_time,
+              arrival_time: bookings[0].return_arrival_time,
             }
           : null,
 
