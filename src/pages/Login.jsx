@@ -30,7 +30,6 @@ const Login = () => {
   const validateEmail = (email) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
-
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
@@ -40,6 +39,7 @@ const Login = () => {
       setError("Vui lòng điền đầy đủ thông tin!");
       return;
     }
+
     if (!validateEmail(email)) {
       setError("Email không hợp lệ!");
       return;
@@ -52,6 +52,7 @@ const Login = () => {
         body: JSON.stringify({ email, password }),
         credentials: "include",
       });
+
       const data = await response.json();
 
       if (!response.ok) {
@@ -59,9 +60,9 @@ const Login = () => {
         return;
       }
 
+      // ✅ Lưu token nếu là admin
       localStorage.setItem("Token", data.accessToken);
 
-      // ⚙️ Nếu chọn "Ghi nhớ đăng nhập"
       if (rememberMe) {
         localStorage.setItem("email", email);
         localStorage.setItem("password", btoa(password));
@@ -73,19 +74,8 @@ const Login = () => {
       }
 
       setMessage("Đăng nhập thành công!");
-
-      // ⚠️ KIỂM TRA có pendingBooking không → Điều hướng quay lại đặt vé nếu có
-      const pendingBooking = localStorage.getItem("pendingBooking");
-
       setTimeout(() => {
-        if (pendingBooking) {
-          localStorage.removeItem("pendingBooking");
-          navigate("/passenger-service", {
-            state: JSON.parse(pendingBooking),
-          });
-        } else {
-          navigate("/");
-        }
+        navigate("/airplanes"); // 🔁 chuyển đến dashboard admin
       }, 1000);
     } catch (error) {
       console.log("Lỗi fetch:", error);

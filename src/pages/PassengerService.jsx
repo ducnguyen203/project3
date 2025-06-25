@@ -265,7 +265,7 @@ const PassengerService = () => {
       if (tripType === "round-trip") {
         await handleConfirmSeats("return", newBookingId);
       }
-
+      alert("Đặt vé thành công!");
       navigate("/Payment", {
         state: {
           bookingId: newBookingId,

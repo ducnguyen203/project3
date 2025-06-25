@@ -19,7 +19,6 @@ const AppRouter = () => {
           <Route path="/Flight" element={<Flight />} />
           <Route path="/MyBooking" element={<MyBooking />} />
           <Route path="/Booking" element={<Booking />} />
-
           <Route path="/PassengerService" element={<PassengerService />} />
         </Routes>
       </MainLayout>
