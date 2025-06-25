@@ -42,9 +42,7 @@ const ScheduleModel = {
     `;
 
     const [rows] = await db.execute(query);
-
-    const formattedRows = rows.map(formatScheduleTime);
-    return formattedRows;
+    return rows.map(formatScheduleTime);
   },
 
   createSchedule: async (newSchedule) => {
@@ -59,12 +57,10 @@ const ScheduleModel = {
       prices,
     } = newSchedule;
 
-    // Bắt đầu giao dịch
     const connection = await db.getConnection();
     try {
       await connection.beginTransaction();
 
-      // Tìm flight_id dựa trên flight_code và mã sân bay
       const [flightRows] = await connection.query(
         `SELECT f.flight_id 
          FROM flights f 
@@ -82,7 +78,6 @@ const ScheduleModel = {
 
       const flight_id = flightRows[0].flight_id;
 
-      // Thêm lịch trình mới
       const [scheduleResult] = await connection.query(
         `INSERT INTO schedules (flight_id, departure_date, departure_time, arrival_time, duration) 
          VALUES (?, ?, ?, ?, ?)`,
@@ -91,7 +86,6 @@ const ScheduleModel = {
 
       const schedule_id = scheduleResult.insertId;
 
-      // Thêm giá vé
       for (const price of prices) {
         const [ticketTypeRows] = await connection.query(
           `SELECT ticket_type_id FROM ticket_types WHERE ticket_type = ?`,
@@ -111,10 +105,8 @@ const ScheduleModel = {
         );
       }
 
-      // Hoàn tất giao dịch
       await connection.commit();
 
-      // Trả về thông tin lịch trình vừa tạo
       return {
         schedule_id,
         flight_code,
@@ -126,6 +118,109 @@ const ScheduleModel = {
         duration,
         prices,
       };
+    } catch (error) {
+      await connection.rollback();
+      throw error;
+    } finally {
+      connection.release();
+    }
+  },
+
+  updateSchedule: async (scheduleId, data) => {
+    const connection = await db.getConnection();
+    try {
+      const {
+        flight_code,
+        departure_airport,
+        arrival_airport,
+        departure_date,
+        departure_time,
+        arrival_time,
+        duration,
+        prices,
+      } = data;
+
+      await connection.beginTransaction();
+
+      const [flightRows] = await connection.query(
+        `SELECT f.flight_id 
+         FROM flights f 
+         JOIN airports dep ON f.departure_airport_id = dep.airport_id 
+         JOIN airports arr ON f.arrival_airport_id = arr.airport_id 
+         WHERE f.flight_code = ? AND dep.airport_code = ? AND arr.airport_code = ?`,
+        [flight_code, departure_airport, arrival_airport]
+      );
+
+      if (flightRows.length === 0) {
+        throw new Error(
+          "Chuyến bay không tồn tại hoặc thông tin sân bay không hợp lệ"
+        );
+      }
+
+      const flight_id = flightRows[0].flight_id;
+
+      await connection.query(
+        `UPDATE schedules 
+         SET flight_id = ?, departure_date = ?, departure_time = ?, arrival_time = ?, duration = ?
+         WHERE schedule_id = ?`,
+        [
+          flight_id,
+          departure_date,
+          departure_time,
+          arrival_time,
+          duration,
+          scheduleId,
+        ]
+      );
+
+      await connection.query(
+        `DELETE FROM flight_prices WHERE schedule_id = ?`,
+        [scheduleId]
+      );
+
+      for (const price of prices) {
+        const [ticketTypeRows] = await connection.query(
+          `SELECT ticket_type_id FROM ticket_types WHERE ticket_type = ?`,
+          [price.ticket_type]
+        );
+
+        if (ticketTypeRows.length === 0) {
+          throw new Error(`Loại vé ${price.ticket_type} không tồn tại`);
+        }
+
+        const ticket_type_id = ticketTypeRows[0].ticket_type_id;
+
+        await connection.query(
+          `INSERT INTO flight_prices (schedule_id, ticket_type_id, price)
+           VALUES (?, ?, ?)`,
+          [scheduleId, ticket_type_id, price.price]
+        );
+      }
+
+      await connection.commit();
+    } catch (error) {
+      await connection.rollback();
+      throw error;
+    } finally {
+      connection.release();
+    }
+  },
+
+  deleteSchedule: async (scheduleId) => {
+    const connection = await db.getConnection();
+    try {
+      await connection.beginTransaction();
+
+      await connection.query(
+        `DELETE FROM flight_prices WHERE schedule_id = ?`,
+        [scheduleId]
+      );
+
+      await connection.query(`DELETE FROM schedules WHERE schedule_id = ?`, [
+        scheduleId,
+      ]);
+
+      await connection.commit();
     } catch (error) {
       await connection.rollback();
       throw error;

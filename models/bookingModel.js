@@ -1,6 +1,33 @@
 const pool = require("../config/db");
 
 class BookingModel {
+  static async getAllBookings() {
+    const [rows] = await pool.query(
+      `SELECT 
+        b.booking_id, 
+        t.ticket_id,
+        b.booking_code, b.total_price, b.status, b.created_at,
+        u.full_name AS booker_name,
+        b.num_passengers,
+        t.full_name AS passenger_name, t.gender, t.passenger_type, t.seat_id, s.seat_number,
+        f.flight_code, tt.ticket_type, fp.price,
+        a1.airport_name AS departure_airport, a2.airport_name AS arrival_airport,
+        sch.departure_date, sch.departure_time, sch.arrival_time
+      FROM bookings b
+      JOIN users u ON b.user_id = u.user_id
+      JOIN tickets t ON b.booking_id = t.booking_id
+      LEFT JOIN seats s ON t.seat_id = s.seat_id
+      JOIN flight_prices fp ON t.price_id = fp.price_id
+      JOIN ticket_types tt ON fp.ticket_type_id = tt.ticket_type_id
+      JOIN schedules sch ON fp.schedule_id = sch.schedule_id
+      JOIN flights f ON sch.flight_id = f.flight_id
+      JOIN airports a1 ON f.departure_airport_id = a1.airport_id
+      JOIN airports a2 ON f.arrival_airport_id = a2.airport_id
+      ORDER BY b.created_at DESC`
+    );
+
+    return rows;
+  }
   static taoMaDatVe() {
     return "BK" + Math.random().toString(36).substr(2, 8).toUpperCase();
   }
@@ -223,6 +250,7 @@ class BookingModel {
 
       const [bookings] = await pool.query(
         `SELECT b.*, t.*, 
+                u.full_name AS booker_name,
                 f1.flight_code as departure_flight_code,
                 f2.flight_code as return_flight_code,
                 a1.airport_name as departure_airport,
@@ -251,6 +279,7 @@ class BookingModel {
          LEFT JOIN airports a3 ON f2.departure_airport_id = a3.airport_id
          LEFT JOIN airports a4 ON f2.arrival_airport_id = a4.airport_id
          LEFT JOIN seats s ON t.seat_id = s.seat_id
+         JOIN users u ON b.user_id = u.user_id
          WHERE b.booking_code = ?`,
         [bookingCode]
       );
@@ -261,6 +290,7 @@ class BookingModel {
 
       // Nhóm vé theo booking
       const bookingDetails = {
+        booker_name: bookings[0].booker_name,
         booking_id: bookings[0].booking_id,
         booking_code: bookings[0].booking_code,
         user_id: bookings[0].user_id,
@@ -326,6 +356,31 @@ class BookingModel {
       return res.status(500).json({
         message: "Lỗi server khi tìm kiếm đặt vé",
       });
+    }
+  }
+  static async deleteBookingById(bookingId) {
+    const connection = await pool.getConnection();
+    try {
+      await connection.beginTransaction();
+
+      // Delete tickets first due to foreign key constraint
+      await connection.query(`DELETE FROM tickets WHERE booking_id = ?`, [
+        bookingId,
+      ]);
+
+      // Then delete the booking
+      const [result] = await connection.query(
+        `DELETE FROM bookings WHERE booking_id = ?`,
+        [bookingId]
+      );
+
+      await connection.commit();
+      return result;
+    } catch (error) {
+      await connection.rollback();
+      throw error;
+    } finally {
+      connection.release();
     }
   }
 }

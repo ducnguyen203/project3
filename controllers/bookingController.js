@@ -1,6 +1,19 @@
 const BookingModel = require("../models/bookingModel");
 
 class BookingController {
+  static async layTatCaDatVe(req, res) {
+    try {
+      const bookings = await BookingModel.getAllBookings();
+      res.status(200).json({
+        message: "Lấy tất cả đặt vé thành công",
+        data: bookings,
+      });
+    } catch (error) {
+      console.error("Lỗi khi lấy tất cả đặt vé:", error);
+      res.status(500).json({ message: "Lỗi server khi lấy danh sách đặt vé" });
+    }
+  }
+
   static async taoDatVe(req, res) {
     try {
       const {
@@ -132,6 +145,26 @@ class BookingController {
     } catch (error) {
       console.error("Lỗi Controller:", error);
       return res.status(500).json({ message: "Lỗi khi tìm kiếm đặt vé" });
+    }
+  }
+  static async deleteBooking(req, res) {
+    try {
+      const { bookingId } = req.params;
+      if (!bookingId) {
+        return res.status(400).json({ message: "Missing bookingId to delete" });
+      }
+
+      const result = await BookingModel.deleteBookingById(bookingId);
+
+      res.status(200).json({
+        message: "Booking deleted successfully",
+        result,
+      });
+    } catch (error) {
+      console.error("Error deleting booking:", error);
+      res.status(500).json({
+        message: "Server error while deleting booking",
+      });
     }
   }
 }

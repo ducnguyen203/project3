@@ -53,6 +53,7 @@ const login = async (req, res) => {
     const [user] = await pool.execute("SELECT * FROM users WHERE email = ?", [
       email,
     ]);
+
     if (user.length === 0) {
       return res
         .status(401)
@@ -66,7 +67,11 @@ const login = async (req, res) => {
         .status(401)
         .json({ message: "Email hoặc mật khẩu không đúng!" });
     }
-
+    if (user[0].role !== "admin") {
+      return res
+        .status(403)
+        .json({ message: "Tài khoản này không có quyền truy cập admin!" });
+    }
     // Tạo token
     const accessToken = generateAccessToken(user[0]);
     const refreshToken = generateRefreshToken(user[0]);

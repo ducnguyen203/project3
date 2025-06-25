@@ -20,6 +20,41 @@ const formatFlightTimes = (flight) => {
     arrival_time: dayjs(fullArrival).tz().format("HH:mm:ss"),
   };
 };
+const updateFlight = async (
+  flight_id,
+  { flight_code, departure_airport_id, arrival_airport_id, status, airplane_id }
+) => {
+  await db.execute(
+    `UPDATE flights 
+   SET flight_code = ?, departure_airport_id = ?, arrival_airport_id = ?, status = ?, airplane_id = ?
+   WHERE flight_id = ?`,
+    [
+      flight_code,
+      departure_airport_id,
+      arrival_airport_id,
+      status,
+      airplane_id,
+      flight_id,
+    ]
+  );
+};
+const getAllFlights = async () => {
+  const [flights] = await db.execute(`
+    SELECT 
+      f.flight_id, f.flight_code, f.status,
+      f.airplane_id, ap.model AS airplane_name,
+      dep.airport_name AS departure_airport,
+      dep.airport_code AS departure_airport_code,
+      arr.airport_name AS arrival_airport,
+      arr.airport_code AS arrival_airport_code
+    FROM flights f
+    JOIN airports dep ON f.departure_airport_id = dep.airport_id
+    JOIN airports arr ON f.arrival_airport_id = arr.airport_id
+    LEFT JOIN airplanes ap ON f.airplane_id = ap.airplane_id
+    ORDER BY f.flight_id DESC
+  `);
+  return flights;
+};
 
 // Lấy giá vé theo schedule
 const getFlightPrices = async (scheduleId) => {
@@ -61,6 +96,13 @@ const queryFlights = async (from, to, date) => {
 
   return flights;
 };
+const findAirportIdByCode = async (code) => {
+  const [rows] = await db.execute(
+    "SELECT airport_id FROM airports WHERE airport_code = ?",
+    [code]
+  );
+  return rows.length > 0 ? rows[0].airport_id : null;
+};
 
 // Model chính
 const Flight = {
@@ -92,6 +134,9 @@ const Flight = {
       throw error;
     }
   },
+  getAllFlights,
+  updateFlight,
+  findAirportIdByCode,
 };
 
 module.exports = Flight;

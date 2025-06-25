@@ -8,7 +8,9 @@ const flightRoutes = require("./routes/flightRoutes");
 const ScheduleRouter = require("./routes/scheduleRoutes");
 const bookingRoutes = require("./routes/bookingRoutes");
 const passengerServiceRoutes = require("./routes/PassengerServiceRoutes");
-
+const airplaneRoutes = require("./routes/airplaneRoutes");
+const ticketRoutes = require("./routes/ticketRoutes");
+const userRoutes = require("./routes/userRoutes");
 dotenv.config();
 
 const app = express();
@@ -17,7 +19,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(
   cors({
-    origin: "http://localhost:5173", // Cho phép frontend
+    origin: ["http://localhost:5173", "http://localhost:5174"], // Cho phép frontend
     credentials: true, // Cho phép gửi cookie
     methods: ["GET", "POST", "PUT", "DELETE"], // Cho phép các phương thức này
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -30,6 +32,10 @@ app.use("/api/flights", flightRoutes);
 app.use("/api/schedules", ScheduleRouter);
 app.use("/api/bookings", bookingRoutes);
 app.use("/api", passengerServiceRoutes);
+app.use("/api/airplanes", airplaneRoutes);
+app.use("/api/airplanes", airplaneRoutes);
+app.use("/api/tickets", ticketRoutes);
+app.use("/api/users", userRoutes);
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

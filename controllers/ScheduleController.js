@@ -94,6 +94,34 @@ const createSchedule = async (req, res) => {
     console.error("Lỗi khi tạo lịch trình:", error);
     res.status(500).json({ message: "Lỗi server", error });
   }
+  // ScheduleController.js
+};
+const deleteSchedule = async (req, res) => {
+  const { id } = req.params;
+  try {
+    await ScheduleModel.deleteSchedule(id);
+    res.status(200).json({ message: "Xoá lịch trình thành công" });
+  } catch (error) {
+    console.error("Lỗi khi xoá lịch trình:", error);
+    res.status(500).json({ message: "Lỗi server", error });
+  }
 };
 
-module.exports = { getAllSchedules, createSchedule };
+const updateSchedule = async (req, res) => {
+  const { id } = req.params;
+  const updatedData = req.body;
+
+  try {
+    await ScheduleModel.updateSchedule(id, updatedData);
+    res.status(200).json({ message: "Cập nhật lịch trình thành công" });
+  } catch (error) {
+    console.error("Lỗi khi cập nhật lịch trình:", error);
+    res.status(500).json({ message: "Lỗi server", error });
+  }
+};
+module.exports = {
+  getAllSchedules,
+  createSchedule,
+  updateSchedule,
+  deleteSchedule,
+};
