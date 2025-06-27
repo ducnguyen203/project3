@@ -125,7 +125,6 @@ const Booking = () => {
     const passengersArray = Object.entries(passengerData);
 
     for (const [section, passenger] of passengersArray) {
-      // ⚠️ Kiểm tra họ tên
       if (!passenger.full_name.trim()) {
         newErrors[`${section}_full_name`] = "Họ và tên không được để trống";
         isValid = false;
@@ -135,13 +134,11 @@ const Booking = () => {
         isValid = false;
       }
 
-      // ⚠️ Kiểm tra giới tính
       if (!passenger.gender) {
         newErrors[`${section}_gender`] = "Vui lòng chọn giới tính";
         isValid = false;
       }
 
-      // ⚠️ Kiểm tra ngày sinh
       if (!passenger.date_of_birth) {
         newErrors[`${section}_date_of_birth`] = "Ngày sinh không được để trống";
         isValid = false;
@@ -176,7 +173,6 @@ const Booking = () => {
           isValid = false;
         }
 
-        // ⚠️ Kiểm tra số điện thoại
         if (!passenger.phone.trim()) {
           newErrors[`${section}_phone`] = "Số điện thoại không được để trống";
           isValid = false;
@@ -186,7 +182,6 @@ const Booking = () => {
           isValid = false;
         }
 
-        // ⚠️ Kiểm tra CCCD
         if (!passenger.cccd.trim()) {
           newErrors[`${section}_cccd`] = "CCCD không được để trống";
           isValid = false;
@@ -196,7 +191,6 @@ const Booking = () => {
         }
       }
 
-      // ⚠️ Kiểm tra Price ID
       if (
         !passenger.price_id_departure ||
         (tripType === "round-trip" && !passenger.price_id_return)
@@ -206,7 +200,6 @@ const Booking = () => {
       }
     }
 
-    // ⚠️ Kiểm tra có ít nhất 1 người lớn nếu có trẻ em hoặc em bé
     const hasChildrenOrInfants = passengersArray.some(
       ([_, p]) => p.passenger_type === "Child" || p.passenger_type === "Infant"
     );
@@ -632,7 +625,7 @@ const Booking = () => {
                     </strong>
                   </div>
                   <div className={style.totalAmount_button}>
-                    <button onClick={handleBooking}>Thanh toán</button>
+                    <button onClick={handleBooking}>Đi tiếp</button>
                   </div>
                 </div>
               </div>

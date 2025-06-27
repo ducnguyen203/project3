@@ -7,7 +7,7 @@ const useAuth = () => {
         const res = await fetch(
           "http://localhost:5000/api/auth/refresh-token",
           {
-            credentials: "include", // Gửi cookie chứa Refresh Token
+            credentials: "include", 
           }
         );
         const data = await res.json();
@@ -15,7 +15,7 @@ const useAuth = () => {
         if (res.ok) {
           localStorage.setItem("accessToken", data.accessToken);
         } else {
-          localStorage.removeItem("accessToken"); // Xóa nếu hết hạn
+          localStorage.removeItem("accessToken"); 
         }
       } catch (error) {
         console.log("Không thể làm mới Access Token, cần đăng nhập lại.");

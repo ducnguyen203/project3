@@ -217,7 +217,7 @@ const PassengerService = () => {
       return;
     }
 
-    // Validate passengerData
+  
     if (
       !passengerData ||
       Object.keys(passengerData).length !== totalPassengers
@@ -236,7 +236,7 @@ const PassengerService = () => {
         userId: 1,
         departureScheduleId: selectedDepartureTicket.schedule_id,
         returnScheduleId: selectedReturnTicket?.schedule_id || null,
-        numPassengers: totalSeatPassengers, // Use adults + children only
+        numPassengers: totalSeatPassengers, 
         totalPrice,
         passengers: Object.values(passengerData),
         tripType,

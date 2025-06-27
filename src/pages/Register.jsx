@@ -14,8 +14,8 @@ const Register = () => {
     password: "",
     phone: "",
   });
-  const [message, setMessage] = useState(""); // Hiển thị thông báo thành công/lỗi
-  const [error, setError] = useState(""); // Lỗi
+  const [message, setMessage] = useState(""); 
+  const [error, setError] = useState(""); 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -45,14 +45,14 @@ const Register = () => {
           phone: "",
         });
         setTimeout(() => {
-          navigate("/login"); // 👈 Chuyển trang sau 2 giây
+          navigate("/login");
         }, 2000);
       } else {
-        setError(data.message || "❌ Đăng ký thất bại!");
+        setError(data.message || " Đăng ký thất bại!");
       }
     } catch (error) {
       console.error("Lỗi khi gọi API:", error);
-      setError("❌ Lỗi khi kết nối đến server!");
+      setError(" Lỗi khi kết nối đến server!");
     }
   };
 

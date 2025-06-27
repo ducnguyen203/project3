@@ -60,7 +60,6 @@ const Login = () => {
         return;
       }
 
-      // ✅ Lưu token nếu là admin
       localStorage.setItem("Token", data.accessToken);
 
       if (rememberMe) {
@@ -75,7 +74,7 @@ const Login = () => {
 
       setMessage("Đăng nhập thành công!");
       setTimeout(() => {
-        navigate("/airplanes"); // 🔁 chuyển đến dashboard admin
+        navigate("/");
       }, 1000);
     } catch (error) {
       console.log("Lỗi fetch:", error);

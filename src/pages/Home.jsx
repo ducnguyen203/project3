@@ -146,13 +146,13 @@ const Home = () => {
   }, []);
 
   const handleSearch = () => {
-    // Kiểm tra các trường bắt buộc
+   
     if (!departure || !destination || !departureDate) {
       alert("Vui lòng nhập đầy đủ thông tin điểm đi, điểm đến và ngày đi.");
       return;
     }
 
-    // Nếu là chuyến khứ hồi, kiểm tra ngày về
+    
     if (tripType === "round-trip" && !returnDate) {
       alert("Vui lòng chọn ngày về cho chuyến khứ hồi.");
       return;
@@ -166,16 +166,16 @@ const Home = () => {
       passengers,
     };
 
-    // Kiểm tra xem dữ liệu có đầy đủ không trước khi lưu
+   
     if (!departure || !destination || !departureDate) {
       alert("Vui lòng nhập đầy đủ thông tin điểm đi, điểm đến và ngày đi.");
-      return; // Ngừng nếu thiếu thông tin
+      return; 
     }
 
     localStorage.setItem("flightSearchParams", JSON.stringify(searchParams));
     localStorage.removeItem("passengers");
 
-    window.location.href = "/flight"; // hoặc navigate("/flight") nếu vẫn dùng react-router
+    window.location.href = "/flight"; 
   };
   useEffect(() => {
     localStorage.setItem("passengers", JSON.stringify(passengers));
@@ -253,7 +253,7 @@ const Home = () => {
                   type="text"
                   placeholder="Vui lòng nhập điểm đến"
                   value={destination}
-                  onFocus={handleDestinationFocus} // Sửa lại hàm gọi
+                  onFocus={handleDestinationFocus} 
                   onChange={handleDestinationChange}
                   ref={inputRefDestination}
                 />
@@ -279,21 +279,21 @@ const Home = () => {
             }
           </div>
           <div className={styles.Block}>
-            {/* Chọn ngày đi */}
+        
             <div className={styles.inputGroup}>
               <FaCalendarAlt className={styles.icondate} />
               <DatePicker
                 selected={departureDate}
                 onChange={(date) => setDepartureDate(date)}
                 placeholderText="Chọn ngày đi"
-                minDate={new Date()} // Ngày đi không thể là quá khứ
+                minDate={new Date()} 
                 dateFormat="dd/MM/yyyy"
                 monthsShown={2}
                 className={styles.dateInput}
               />
               <label className={styles.sm}>Ngày đi</label>
             </div>
-            {/* Chọn ngày về chỉ hiển thị cho chuyến khứ hồi */}
+         
             {tripType === "round-trip" && (
               <div className={styles.inputGroup}>
                 <FaCalendarAlt className={styles.icondate} />
@@ -301,16 +301,16 @@ const Home = () => {
                   selected={returnDate}
                   onChange={setReturnDate}
                   placeholderText="Chọn ngày về"
-                  minDate={departureDate} // Ngày về không thể trước ngày đi
+                  minDate={departureDate} 
                   dateFormat="dd/MM/yyyy"
-                  monthsShown={2} // Hiển thị 2 tháng cạnh nhau
+                  monthsShown={2} 
                   className={styles.dateInput}
                 />
                 <label className={styles.sm}>Ngày về</label>
               </div>
             )}
           </div>
-          {/* Chọn hành khách */}
+        
 
           <div className={styles.Input_input_group}>
             <div className={styles.Input_input_group}>
@@ -369,7 +369,7 @@ const Home = () => {
                 <label className={styles.sm}>Em bé</label>
               </div>
 
-              {/* Nút tìm kiếm */}
+           
 
               <button className={styles.searchButton} onClick={handleSearch}>
                 <FaSearch className={styles.icondate} /> Tìm chuyến bay

@@ -87,7 +87,7 @@ const Flight = () => {
           parsedParams.returnDate ? new Date(parsedParams.returnDate) : null
         );
         setPassengers(parsedParams.passengers);
-        setShouldAutoSearch(true); // <-- cho phép tự tìm sau khi gán state
+        setShouldAutoSearch(true); 
       } else {
         alert("Vui lòng nhập đầy đủ thông tin.");
       }
@@ -113,7 +113,7 @@ const Flight = () => {
         return;
       }
 
-      // ✅ Reset lỗi nếu hợp lệ
+     
       setErrors({
         departure: false,
         destination: false,
