@@ -3,7 +3,7 @@ const router = express.Router();
 const FlightsController = require("../controllers/FlightsController");
 const { verifyToken, isAdmin } = require("../middleware/authMiddleware");
 
-router.get("/", FlightsController.getAllFlights); // ✅ API lấy danh sách chuyến bay
+router.get("/", FlightsController.getAllFlights);
 router.get("/search", FlightsController.searchFlights);
 router.post("/", verifyToken, isAdmin, FlightsController.createFlight);
 router.delete(

@@ -10,7 +10,7 @@ const router = express.Router();
 
 router.post("/register", register);
 router.post("/login", login);
-router.get("/refresh-token", refreshToken); // 🔥 Fix lỗi thiếu route này
+router.get("/refresh-token", refreshToken); 
 router.post("/logout", logout);
 
 module.exports = router;

@@ -33,7 +33,7 @@ const searchFlights = async (req, res) => {
   }
 };
 
-// ✅ Thêm chuyến bay
+
 const createFlight = async (req, res) => {
   const {
     flight_code,
@@ -71,12 +71,12 @@ const createFlight = async (req, res) => {
   }
 };
 
-// ✅ Xoá chuyến bay
+
 const deleteFlight = async (req, res) => {
   const { flightId } = req.params;
 
   try {
-    // Kiểm tra tồn tại
+
     const [check] = await db.execute(
       "SELECT * FROM flights WHERE flight_id = ?",
       [flightId]

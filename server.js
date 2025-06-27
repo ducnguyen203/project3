@@ -19,9 +19,9 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(
   cors({
-    origin: ["http://localhost:5173", "http://localhost:5174"], // Cho phép frontend
-    credentials: true, // Cho phép gửi cookie
-    methods: ["GET", "POST", "PUT", "DELETE"], // Cho phép các phương thức này
+    origin: ["http://localhost:5173", "http://localhost:5174"], 
+    credentials: true, 
+    methods: ["GET", "POST", "PUT", "DELETE"], 
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );

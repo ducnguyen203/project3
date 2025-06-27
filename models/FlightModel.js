@@ -7,7 +7,7 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.tz.setDefault("Asia/Ho_Chi_Minh");
 
-// Format thời gian bay
+
 const formatFlightTimes = (flight) => {
   const departureDate = dayjs(flight.departure_date).format("YYYY-MM-DD");
   const fullDeparture = `${departureDate} ${flight.departure_time}`;
@@ -56,7 +56,7 @@ const getAllFlights = async () => {
   return flights;
 };
 
-// Lấy giá vé theo schedule
+
 const getFlightPrices = async (scheduleId) => {
   const [prices] = await db.execute(
     `SELECT t.ticket_type, fp.price ,fp.price_id
@@ -68,7 +68,6 @@ const getFlightPrices = async (scheduleId) => {
   return prices;
 };
 
-// Truy vấn các chuyến bay
 const queryFlights = async (from, to, date) => {
   const query = `
     SELECT 
@@ -104,7 +103,6 @@ const findAirportIdByCode = async (code) => {
   return rows.length > 0 ? rows[0].airport_id : null;
 };
 
-// Model chính
 const Flight = {
   searchFlights: async (
     departure,

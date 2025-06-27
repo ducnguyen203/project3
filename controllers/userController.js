@@ -14,7 +14,7 @@ const getAllUsers = async (req, res) => {
 const deleteUser = async (req, res) => {
   const { id } = req.params;
   try {
-    // 👇 sửa "id" thành "user_id"
+  
     const [result] = await pool.execute("DELETE FROM users WHERE user_id = ?", [
       id,
     ]);

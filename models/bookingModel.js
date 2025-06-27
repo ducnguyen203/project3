@@ -64,7 +64,7 @@ class BookingModel {
       const firstAdultTicketIds = { departure: null, return: null };
       const ticketIds = [];
 
-      // Vòng lặp 1: Xử lý vé người lớn trước
+     
       for (const hanhKhach of passengers) {
         if (hanhKhach.passenger_type !== "Adult") continue;
 
@@ -139,7 +139,6 @@ class BookingModel {
         }
       }
 
-      // Vòng lặp 2: Xử lý vé trẻ em và em bé
       for (const hanhKhach of passengers) {
         if (hanhKhach.passenger_type === "Adult") continue;
 
@@ -183,7 +182,7 @@ class BookingModel {
             firstAdultTicketIds[flight_direction] ||
             firstAdultTicketIds.departure ||
             firstAdultTicketIds.return;
-          // Không throw error, để accompanying_adult_ticket_id là null nếu không tìm thấy
+ 
           console.log(
             `Processing ${passenger_type}: ${full_name}, accompanying_adult_ticket_id: ${accompanyingAdultTicketId}`
           );
@@ -288,7 +287,6 @@ class BookingModel {
         return res.status(404).json({ message: "Không tìm thấy đặt vé" });
       }
 
-      // Nhóm vé theo booking
       const bookingDetails = {
         booker_name: bookings[0].booker_name,
         booking_id: bookings[0].booking_id,
@@ -363,12 +361,11 @@ class BookingModel {
     try {
       await connection.beginTransaction();
 
-      // Delete tickets first due to foreign key constraint
+
       await connection.query(`DELETE FROM tickets WHERE booking_id = ?`, [
         bookingId,
       ]);
 
-      // Then delete the booking
       const [result] = await connection.query(
         `DELETE FROM bookings WHERE booking_id = ?`,
         [bookingId]

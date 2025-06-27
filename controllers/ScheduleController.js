@@ -4,7 +4,7 @@ const getAllSchedules = async (req, res) => {
   try {
     const rows = await ScheduleModel.getAllSchedulesWithPrices();
 
-    // Gom theo schedule_id
+
     const schedules = {};
 
     rows.forEach((row) => {
@@ -48,7 +48,7 @@ const createSchedule = async (req, res) => {
       prices,
     } = req.body;
 
-    // Validate required fields
+   
     if (
       !flight_code ||
       !departure_airport ||
@@ -65,14 +65,14 @@ const createSchedule = async (req, res) => {
         .json({ message: "Thiếu hoặc dữ liệu không hợp lệ" });
     }
 
-    // Validate prices array
+
     for (const price of prices) {
       if (!price.ticket_type || !price.price) {
         return res.status(400).json({ message: "Dữ liệu giá vé không hợp lệ" });
       }
     }
 
-    // Create new schedule
+
     const newSchedule = {
       flight_code,
       departure_airport,

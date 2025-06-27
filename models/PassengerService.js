@@ -47,7 +47,7 @@ class PassengerService {
           seatId: seat.seat_id,
           seat: seat.seat_number,
           seatType: seat.seat_type,
-          available: seat.check_status === 1, // MỚI → Chính xác
+          available: seat.check_status === 1, 
         });
       });
       if (currentRow.length) seatMap.push(currentRow);
@@ -80,7 +80,7 @@ class PassengerService {
       });
       await connection.beginTransaction();
 
-      // Tìm ticket_id
+      
       const ticketQuery = `
         SELECT t.ticket_id
         FROM tickets t
@@ -103,7 +103,7 @@ class PassengerService {
 
       const ticketId = ticketResult[0].ticket_id;
 
-      // Tìm seat_id
+
       const seatQuery = `
         SELECT seat_id
         FROM seats
@@ -115,7 +115,7 @@ class PassengerService {
       }
       const seatId = seatResult[0].seat_id;
 
-      // Thêm bản ghi vào seat_availability nếu chưa tồn tại (giả định ghế ban đầu khả dụng)
+      
       const insertAvailabilityQuery = `
         INSERT IGNORE INTO seat_availability (schedule_id, seat_id, check_status)
         VALUES (?, ?, 1)
@@ -123,7 +123,7 @@ class PassengerService {
       `;
       await connection.query(insertAvailabilityQuery, [scheduleId, seatId]);
 
-      // Kiểm tra trạng thái ghế
+      
       const availabilityQuery = `
         SELECT check_status
         FROM seat_availability
@@ -151,7 +151,7 @@ class PassengerService {
         );
       }
 
-      // Cập nhật ticket với seat_id
+     
       const updateTicketQuery = `
         UPDATE tickets
         SET seat_id = ?
@@ -159,7 +159,7 @@ class PassengerService {
       `;
       await connection.query(updateTicketQuery, [seatId, ticketId]);
 
-      // Cập nhật trạng thái ghế
+  
       const updateAvailabilityQuery = `
         UPDATE seat_availability
         SET check_status = 0

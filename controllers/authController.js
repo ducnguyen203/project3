@@ -1,27 +1,23 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const pool = require("../config/db"); // Kết nối database
+const pool = require("../config/db");
 
-// Tạo Access Token
 const generateAccessToken = (user) => {
   return jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, {
     expiresIn: "1h",
   });
 };
 
-// Tạo Refresh Token
 const generateRefreshToken = (user) => {
   return jwt.sign({ id: user.id }, process.env.JWT_REFRESH_SECRET, {
     expiresIn: "7d",
   });
 };
 
-// Đăng ký tài khoản
 const register = async (req, res) => {
   try {
     const { full_name, email, password, phone } = req.body;
 
-    // Kiểm tra email đã tồn tại chưa
     const [existingUser] = await pool.execute(
       "SELECT * FROM users WHERE email = ?",
       [email]
@@ -30,10 +26,8 @@ const register = async (req, res) => {
       return res.status(400).json({ message: "Email đã tồn tại!" });
     }
 
-    // Hash mật khẩu
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Thêm vào database với role mặc định là 'user'
     const sql = `INSERT INTO users (full_name, email, password, phone, role) VALUES (?, ?, ?, ?, 'user')`;
     await pool.execute(sql, [full_name, email, hashedPassword, phone]);
 
@@ -44,12 +38,10 @@ const register = async (req, res) => {
   }
 };
 
-// Đăng nhập tài khoản
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Kiểm tra user có tồn tại không
     const [user] = await pool.execute("SELECT * FROM users WHERE email = ?", [
       email,
     ]);
@@ -60,28 +52,21 @@ const login = async (req, res) => {
         .json({ message: "Email hoặc mật khẩu không đúng!" });
     }
 
-    // So sánh mật khẩu
     const isMatch = await bcrypt.compare(password, user[0].password);
     if (!isMatch) {
       return res
         .status(401)
         .json({ message: "Email hoặc mật khẩu không đúng!" });
     }
-    if (user[0].role !== "admin") {
-      return res
-        .status(403)
-        .json({ message: "Tài khoản này không có quyền truy cập admin!" });
-    }
-    // Tạo token
+
     const accessToken = generateAccessToken(user[0]);
     const refreshToken = generateRefreshToken(user[0]);
 
-    // Lưu Refresh Token vào cookie HTTP-only
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "Strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 ngày
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     res.json({ accessToken, role: user[0].role, userId: user[0].id });
@@ -91,9 +76,8 @@ const login = async (req, res) => {
   }
 };
 
-// API làm mới Access Token
 const refreshToken = (req, res) => {
-  const token = req.cookies.refreshToken; // 🛠 Fix lỗi lấy cookies
+  const token = req.cookies.refreshToken;
   if (!token)
     return res.status(403).json({ message: "Không có Refresh Token!" });
 
@@ -106,7 +90,6 @@ const refreshToken = (req, res) => {
   });
 };
 
-// Đăng xuất (Xóa cookie Refresh Token)
 const logout = (req, res) => {
   try {
     res.clearCookie("refreshToken", {

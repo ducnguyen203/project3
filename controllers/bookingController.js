@@ -27,7 +27,7 @@ class BookingController {
         selectedReturnTicket,
       } = req.body;
 
-      // Kiểm tra đầu vào
+
       if (
         !userId ||
         !departureScheduleId ||
@@ -39,7 +39,6 @@ class BookingController {
         return res.status(400).json({ message: "Thiếu các trường bắt buộc" });
       }
 
-      // Kiểm tra có ít nhất một người lớn nếu có trẻ em hoặc em bé
       const hasChildrenOrInfants = passengers.some(
         (p) => p.passenger_type === "Child" || p.passenger_type === "Infant"
       );
@@ -50,7 +49,7 @@ class BookingController {
         });
       }
 
-      // Kiểm tra dữ liệu hành khách
+  
       for (const hanhKhach of passengers) {
         if (!["Adult", "Child", "Infant"].includes(hanhKhach.passenger_type)) {
           return res.status(400).json({
@@ -86,7 +85,7 @@ class BookingController {
         }
       }
 
-      // Tạo danh sách hành khách mở rộng cho round-trip
+   
       let extendedPassengers = passengers;
       if (tripType === "round-trip") {
         extendedPassengers = [];
@@ -110,7 +109,7 @@ class BookingController {
         }));
       }
 
-      // Tạo đặt vé
+
       const { bookingId, maDatVe, ticketIds } = await BookingModel.taoDatVe({
         userId,
         departureScheduleId,
@@ -121,7 +120,7 @@ class BookingController {
         tripType,
       });
 
-      // Lấy chi tiết đặt vé để phản hồi
+
       const chiTietDatVe = await BookingModel.layDatVeTheoId(bookingId);
 
       res.status(201).json({

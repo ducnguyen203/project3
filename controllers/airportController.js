@@ -66,7 +66,7 @@ const searchFlights = (req, res) => {
   const { departure, destination, departureDate, returnDate, tripType } =
     req.query;
 
-  // Kiểm tra dữ liệu đầu vào
+
   if (
     !departure ||
     !destination ||
@@ -79,11 +79,11 @@ const searchFlights = (req, res) => {
     });
   }
 
-  // Lấy ngày đi và ngày về
+ 
   const departureDateFormatted = new Date(departureDate);
   const returnDateFormatted = returnDate ? new Date(returnDate) : null;
 
-  // Gọi hàm tìm kiếm sân bay
+ 
   Airport.searchAirports(departure, destination, (err, results) => {
     if (err) {
       return res
@@ -91,9 +91,9 @@ const searchFlights = (req, res) => {
         .json({ message: "Lỗi hệ thống khi tìm kiếm sân bay", error: err });
     }
 
-    // Nếu là chuyến khứ hồi, kiểm tra ngày đi và ngày về
+   
     if (tripType === "round-trip" && returnDateFormatted) {
-      // Kiểm tra ngày về hợp lệ
+   
       if (returnDateFormatted <= departureDateFormatted) {
         return res
           .status(400)
@@ -101,7 +101,6 @@ const searchFlights = (req, res) => {
       }
     }
 
-    // Trả về kết quả tìm kiếm
     return res.status(200).json(results);
   });
 };
